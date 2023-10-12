@@ -32,7 +32,9 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [features]
-default = []
+default = ["std"]
+alloc = []
+std = ["alloc"]
 
 [dependencies]
 
