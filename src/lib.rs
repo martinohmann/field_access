@@ -18,9 +18,12 @@ use paste::paste;
 
 pub use field_access_derive::*;
 
+/// The type returned for all errors that may occur when accessing a struct field.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum AccessError {
+    /// The field does not exist on the struct.
     NoSuchField,
+    /// The field exists, but it was accessed using an incompatible type.
     TypeMismatch,
 }
 
@@ -238,6 +241,11 @@ macro_rules! primitive_getters {
 
 macro_rules! immutable_field_methods {
     () => {
+        /// Returns `true` if the field is if type `T`.
+        ///
+        /// Please note that this also returns `false` if the field does not exist.
+        ///
+        /// To check for existence, use [`.exists()`](Self::exists).
         #[inline]
         pub fn is<T: Any>(&self) -> bool {
             self.access.field_as_any(self.field)
@@ -270,6 +278,31 @@ macro_rules! immutable_field_methods {
             self.access.has_field(self.field)
         }
 
+        /// Tries to obtain an immutable reference to the value of type `T`.
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// use field_access::{AccessError, FieldAccess};
+        ///
+        /// #[derive(FieldAccess)]
+        /// struct Foo {
+        ///     a: u8
+        /// }
+        ///
+        /// let foo = Foo { a: 42 };
+        ///
+        /// // Field `a` exists.
+        /// assert_eq!(foo.field("a").get::<u8>(), Ok(&42u8));
+        /// assert_eq!(foo.field("a").get::<&str>(), Err(AccessError::TypeMismatch));
+        ///
+        /// // Field `b` does not exist.
+        /// assert_eq!(foo.field("b").get::<&str>(), Err(AccessError::NoSuchField));
+        /// ```
+        ///
+        /// # Errors
+        ///
+        /// See the documentation of [`AccessError`][AccessError].
         #[inline]
         pub fn get<T: Any>(&self) -> Result<&T, AccessError> {
             self.access.get(self.field)
@@ -373,6 +406,7 @@ macro_rules! immutable_field_methods {
     };
 }
 
+/// An immutable struct field reference.
 pub struct FieldRef<'a> {
     access: &'a dyn FieldAccess,
     field: &'a str,
@@ -386,6 +420,7 @@ impl<'a> FieldRef<'a> {
     immutable_field_methods!();
 }
 
+/// A mutable struct field reference.
 pub struct FieldMut<'a> {
     access: &'a mut dyn FieldAccess,
     field: &'a str,
@@ -398,6 +433,35 @@ impl<'a> FieldMut<'a> {
 
     immutable_field_methods!();
 
+    /// Tries to obtain a mutable reference to the value of type `T`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::{AccessError, FieldAccess};
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let mut foo = Foo { a: 1 };
+    ///
+    /// // Field `a` exists.
+    /// if let Ok(field) = foo.field_mut("a").get_mut::<u8>() {
+    ///     *field = 42;
+    /// }
+    ///
+    /// assert_eq!(foo.field("a").as_u8(), Ok(42u8));
+    /// assert_eq!(foo.field_mut("a").get_mut::<&str>(), Err(AccessError::TypeMismatch));
+    ///
+    /// // Field `b` does not exist.
+    /// assert_eq!(foo.field_mut("b").get_mut::<&str>(), Err(AccessError::NoSuchField));
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// See the documentation of [`AccessError`][AccessError].
     #[inline]
     pub fn get_mut<T: Any>(&mut self) -> Result<&mut T, AccessError> {
         self.access.get_mut(self.field)
