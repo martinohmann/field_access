@@ -38,7 +38,7 @@ impl std::error::Error for AccessError {}
 
 /// Low-level struct field access.
 ///
-/// This trait can be implemented to provides access to the methods of the
+/// This trait can be implemented to provide access to the methods of the
 /// [`FieldAccess`](FieldAccess) trait which has a blanket implementation for any type
 /// implementing `AnyFieldAccess`.
 ///
@@ -243,6 +243,31 @@ macro_rules! immutable_field_methods {
             self.access.field_as_any(self.field)
                        .map(|field| field.is::<T>())
                        .unwrap_or(false)
+        }
+
+        /// Returns `true` if the field exists.
+        ///
+        /// If you don't have a `FieldRef` already, it is usually more convenient to use
+        /// [`FieldAccess::has_field`](FieldAccess::has_field) instead.
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// use field_access::FieldAccess;
+        ///
+        /// #[derive(FieldAccess)]
+        /// struct Foo {
+        ///     a: u8
+        /// }
+        ///
+        /// let foo = Foo { a: 1 };
+        ///
+        /// assert!(foo.field("a").exists());
+        /// assert!(!foo.field("b").exists());
+        /// ```
+        #[inline]
+        pub fn exists(&self) -> bool {
+            self.access.has_field(self.field)
         }
 
         #[inline]
