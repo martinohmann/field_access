@@ -1,6 +1,6 @@
 use field_access::FieldAccess;
 
-#[derive(FieldAccess, Debug)]
+#[derive(FieldAccess)]
 pub enum Enum {
     A(i64),
     B(u8),

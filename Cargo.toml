@@ -39,6 +39,7 @@ std = ["alloc"]
 
 [dependencies]
 field_access_derive = { version = "=0.0.1", path = "derive" }
+paste = "1.0.14"
 
 [dev-dependencies]
 trybuild = { version = "1.0.81", features = ["diff"] }
