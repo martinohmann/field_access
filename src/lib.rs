@@ -1,13 +1,5 @@
 #![doc = include_str!("../README.md")]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
-#![allow(missing_docs)]
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::match_wildcard_for_single_variants,
-    clippy::module_name_repetitions,
-    clippy::must_use_candidate,
-    clippy::return_self_not_must_use
-)]
 #![no_std]
 
 #[cfg(feature = "alloc")]
@@ -16,8 +8,6 @@ extern crate alloc;
 #[cfg(feature = "std")]
 extern crate std;
 
-#[cfg(feature = "alloc")]
-use alloc::string::String;
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 use core::any::Any;
@@ -41,19 +31,6 @@ impl fmt::Display for AccessError {
 #[cfg(feature = "std")]
 impl std::error::Error for AccessError {}
 
-macro_rules! primitive_methods {
-    ($($ty:ty => $get:ident),*) => {
-        $(
-            #[inline]
-            fn $get(&self, field: &str) -> Result<$ty, AccessError> {
-                self.get_any(field)
-                    .and_then(try_downcast_ref)
-                    .map(|v| *v)
-            }
-        )*
-    };
-}
-
 macro_rules! first_ok {
     ($value:expr, $($ty:ty => $map:expr),*) => {{
         $(if let Some(value) = $value.downcast_ref::<$ty>().map($map) {
@@ -68,35 +45,6 @@ pub trait FieldAccess {
     fn get_any(&self, field: &str) -> Result<&dyn Any, AccessError>;
 
     fn get_any_mut(&mut self, field: &str) -> Result<&mut dyn Any, AccessError>;
-
-    #[cfg(feature = "alloc")]
-    #[inline]
-    fn get_str(&self, field: &str) -> Result<&str, AccessError> {
-        self.get_any(field)
-            .and_then(|value| first_ok!(value, &str => |v| *v, String => String::as_str))
-    }
-
-    #[cfg(not(feature = "alloc"))]
-    #[inline]
-    fn get_str(&self, field: &str) -> Result<&str, AccessError> {
-        self.get_any(field).and_then(try_downcast_ref).map(|v| *v)
-    }
-
-    primitive_methods! {
-        bool => get_bool,
-        u8 => get_u8,
-        u16 => get_u16,
-        u32 => get_u32,
-        u64 => get_u64,
-        u128 => get_u128,
-        i8 => get_i8,
-        i16 => get_i16,
-        i32 => get_i32,
-        i64 => get_i64,
-        i128 => get_i128,
-        f32 => get_f32,
-        f64 => get_f64
-    }
 }
 
 impl dyn FieldAccess {
