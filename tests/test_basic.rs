@@ -10,8 +10,8 @@ fn it_works() {
 
     let mut foo = Foo { a: 1 };
 
-    assert!(foo.get_field("a").is_ok());
-    assert!(foo.get_field("b").is_err());
+    assert!(foo.has_field("a"));
+    assert!(!foo.has_field("b"));
 
     assert_eq!(foo.field("a").get::<&str>(), Err(AccessError::TypeMismatch));
     assert_eq!(foo.field("b").get::<u8>(), Err(AccessError::NoSuchField));

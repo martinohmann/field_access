@@ -36,10 +36,36 @@ impl fmt::Display for AccessError {
 #[cfg(feature = "std")]
 impl std::error::Error for AccessError {}
 
-pub trait FieldAccess: Any {
-    fn get_field(&self, field: &str) -> Result<&dyn Any, AccessError>;
+/// Low-level struct field access.
+///
+/// This trait can be implemented to provides access to the methods of the
+/// [`FieldAccess`](FieldAccess) trait which has a blanket implementation for any type
+/// implementing `AnyFieldAccess`.
+///
+/// Consider automatically implementing it via `#[derive(FieldAccess)]` for structs where you need
+/// dynamic field access.
+pub trait AnyFieldAccess: Any {
+    /// Provides an immutable reference to a struct field.
+    ///
+    /// # Errors
+    ///
+    /// See the documentation of [`AccessError`][AccessError].
+    fn field_as_any(&self, field: &str) -> Result<&dyn Any, AccessError>;
 
-    fn get_field_mut(&mut self, field: &str) -> Result<&mut dyn Any, AccessError>;
+    /// Provides a mutable reference to a struct field.
+    ///
+    /// # Errors
+    ///
+    /// See the documentation of [`AccessError`][AccessError].
+    fn field_as_any_mut(&mut self, field: &str) -> Result<&mut dyn Any, AccessError>;
+}
+
+/// High-level struct field access.
+pub trait FieldAccess: AnyFieldAccess {
+    #[inline]
+    fn has_field(&self, field: &str) -> bool {
+        self.field_as_any(field).is_ok()
+    }
 
     #[inline]
     fn field<'a>(&'a self, field: &'a str) -> FieldRef<'a>
@@ -58,15 +84,17 @@ pub trait FieldAccess: Any {
     }
 }
 
+impl<T> FieldAccess for T where T: AnyFieldAccess {}
+
 impl dyn FieldAccess {
     #[inline]
     pub fn get<T: Any>(&self, field: &str) -> Result<&T, AccessError> {
-        self.get_field(field).and_then(try_downcast_ref)
+        self.field_as_any(field).and_then(try_downcast_ref)
     }
 
     #[inline]
     pub fn get_mut<T: Any>(&mut self, field: &str) -> Result<&mut T, AccessError> {
-        self.get_field_mut(field).and_then(try_downcast_mut)
+        self.field_as_any_mut(field).and_then(try_downcast_mut)
     }
 
     #[inline]
@@ -126,7 +154,7 @@ macro_rules! primitive_getter {
             /// See the documentation of [`AccessError`][AccessError].
             #[inline]
             pub fn [<as_ $ident>](&self) -> Result<$ty, AccessError> {
-                self.access.get_field(self.field).and_then(|value| {
+                self.access.field_as_any(self.field).and_then(|value| {
                     match_downcast_ref!(
                         value,
                         $($rest)*
@@ -152,7 +180,7 @@ macro_rules! immutable_field_methods {
     () => {
         #[inline]
         pub fn is<T: Any>(&self) -> bool {
-            self.access.get_field(self.field)
+            self.access.field_as_any(self.field)
                        .map(|field| field.is::<T>())
                        .unwrap_or(false)
         }
@@ -165,7 +193,7 @@ macro_rules! immutable_field_methods {
         #[cfg(feature = "alloc")]
         #[inline]
         pub fn as_slice<T: Any>(&self) -> Result<&[T], AccessError> {
-            self.access.get_field(self.field).and_then(|value| {
+            self.access.field_as_any(self.field).and_then(|value| {
                 match_downcast_ref!(
                     value,
                     &[T] => |&v| Some(v),
