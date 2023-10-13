@@ -145,30 +145,30 @@ impl<T> FieldAccess for T where T: AnyFieldAccess {}
 
 impl dyn FieldAccess {
     #[inline]
-    pub fn get<T: Any>(&self, field: &str) -> Result<&T, AccessError> {
+    fn get<T: Any>(&self, field: &str) -> Result<&T, AccessError> {
         self.field_as_any(field)
             .and_then(|value| value.downcast_ref().ok_or(AccessError::TypeMismatch))
     }
 
     #[inline]
-    pub fn get_mut<T: Any>(&mut self, field: &str) -> Result<&mut T, AccessError> {
+    fn get_mut<T: Any>(&mut self, field: &str) -> Result<&mut T, AccessError> {
         self.field_as_any_mut(field)
             .and_then(|value| value.downcast_mut().ok_or(AccessError::TypeMismatch))
     }
 
     #[inline]
-    pub fn set<T: Any>(&mut self, field: &str, value: T) -> Result<(), AccessError> {
+    fn set<T: Any>(&mut self, field: &str, value: T) -> Result<(), AccessError> {
         self.replace(field, value).map(|_| ())
     }
 
     #[inline]
-    pub fn replace<T: Any>(&mut self, field: &str, value: T) -> Result<T, AccessError> {
+    fn replace<T: Any>(&mut self, field: &str, value: T) -> Result<T, AccessError> {
         self.get_mut(field)
             .map(|dest| core::mem::replace(dest, value))
     }
 
     #[inline]
-    pub fn take<T: Any + Default>(&mut self, field: &str) -> Result<T, AccessError> {
+    fn take<T: Any + Default>(&mut self, field: &str) -> Result<T, AccessError> {
         self.replace(field, T::default())
     }
 }
