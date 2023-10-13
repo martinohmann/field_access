@@ -163,7 +163,8 @@ impl dyn FieldAccess {
 
     #[inline]
     pub fn replace<T: Any>(&mut self, field: &str, value: T) -> Result<T, AccessError> {
-        Ok(core::mem::replace(self.get_mut(field)?, value))
+        self.get_mut(field)
+            .map(|dest| core::mem::replace(dest, value))
     }
 
     #[inline]
