@@ -1,0 +1,8 @@
+error: FieldAccess does not support enums
+ --> tests/ui/enum.rs:4:1
+  |
+4 | / pub enum Enum {
+5 | |     A(i64),
+6 | |     B(u8),
+7 | | }
+  | |_^

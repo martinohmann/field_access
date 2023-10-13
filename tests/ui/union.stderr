@@ -1,0 +1,8 @@
+error: FieldAccess does not support unions
+ --> tests/ui/union.rs:4:1
+  |
+4 | / pub union Union {
+5 | |     a: i64,
+6 | |     b: u8,
+7 | | }
+  | |_^

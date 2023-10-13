@@ -13,6 +13,8 @@ use alloc::vec::Vec;
 use core::any::Any;
 use core::fmt;
 
+pub use field_access_derive::*;
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum AccessError {
     NoSuchField,
@@ -41,27 +43,43 @@ macro_rules! first_ok {
     }};
 }
 
-pub trait FieldAccess {
-    fn get_any(&self, field: &str) -> Result<&dyn Any, AccessError>;
+pub trait FieldAccess: Any {
+    fn get_dyn(&self, field: &str) -> Result<&dyn Any, AccessError>;
 
-    fn get_any_mut(&mut self, field: &str) -> Result<&mut dyn Any, AccessError>;
+    fn get_dyn_mut(&mut self, field: &str) -> Result<&mut dyn Any, AccessError>;
+
+    #[inline]
+    fn as_dyn(&self) -> &dyn FieldAccess
+    where
+        Self: Sized,
+    {
+        self
+    }
+
+    #[inline]
+    fn as_dyn_mut(&mut self) -> &mut dyn FieldAccess
+    where
+        Self: Sized,
+    {
+        self
+    }
 }
 
 impl dyn FieldAccess {
     #[inline]
     pub fn get<T: Any>(&self, field: &str) -> Result<&T, AccessError> {
-        self.get_any(field).and_then(try_downcast_ref)
+        self.get_dyn(field).and_then(try_downcast_ref)
     }
 
     #[inline]
     pub fn get_mut<T: Any>(&mut self, field: &str) -> Result<&mut T, AccessError> {
-        self.get_any_mut(field).and_then(try_downcast_mut)
+        self.get_dyn_mut(field).and_then(try_downcast_mut)
     }
 
     #[cfg(feature = "alloc")]
     #[inline]
     pub fn get_slice<T: Any>(&self, field: &str) -> Result<&[T], AccessError> {
-        self.get_any(field)
+        self.get_dyn(field)
             .and_then(|value| first_ok!(value, &[T] => |v| *v, Vec<T> => Vec::as_slice))
     }
 

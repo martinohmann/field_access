@@ -1,0 +1,19 @@
+[package]
+name = "field_access_derive"
+version = "0.0.1"
+license.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+include.workspace = true
+
+[lib]
+proc-macro = true
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+proc-macro2 = "1.0.63"
+quote = "1.0.29"
+syn = "2.0.23"
