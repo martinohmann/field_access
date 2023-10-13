@@ -292,18 +292,21 @@ macro_rules! immutable_field_methods {
             }
             u32 {
                 u32 => |&v| Some(v),
-                u8 | u16 => |&v| Some(v.into()),
+                u16 | u8 => |&v| Some(v.into()),
                 u64 | u128 => |&v| v.try_into().ok(),
             }
             u64 {
                 u64 => |&v| Some(v),
-                u8 | u16 | u32 => |&v| Some(v.into()),
+                u32 | u16 | u8 => |&v| Some(v.into()),
                 u128 => |&v| v.try_into().ok(),
             }
             u128 {
                 u128 => |&v| Some(v),
                 u8 | u16 | u32 | u64 => |&v| Some(v.into()),
             }
+        }
+
+        primitive_getters! {
             i8 {
                 i8 => |&v| Some(v),
                 i16 | i32 | i64 | i128 => |&v| v.try_into().ok(),
@@ -315,18 +318,21 @@ macro_rules! immutable_field_methods {
             }
             i32 {
                 i32 => |&v| Some(v),
-                i8 | i16 => |&v| Some(v.into()),
+                i16 | i8 => |&v| Some(v.into()),
                 i64 | i128 => |&v| v.try_into().ok(),
             }
             i64 {
                 i64 => |&v| Some(v),
-                i8 | i16 | i32 => |&v| Some(v.into()),
+                i32 | i16 | i8 => |&v| Some(v.into()),
                 i128 => |&v| v.try_into().ok(),
             }
             i128 {
                 i128 => |&v| Some(v),
                 i8 | i16 | i32 | i64 => |&v| Some(v.into()),
             }
+        }
+
+        primitive_getters! {
             f32 {
                 f32 => |&v| Some(v),
                 f64 => |&v| Some(v as f32),
