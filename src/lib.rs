@@ -111,7 +111,7 @@ pub trait FieldAccess: AnyFieldAccess {
     where
         Self: Sized,
     {
-        FieldRef::new(field, self)
+        FieldRef::new(self, field)
     }
 
     /// Mutable field access.
@@ -137,7 +137,7 @@ pub trait FieldAccess: AnyFieldAccess {
     where
         Self: Sized,
     {
-        FieldMut::new(field, self)
+        FieldMut::new(self, field)
     }
 }
 
@@ -374,26 +374,26 @@ macro_rules! immutable_field_methods {
 }
 
 pub struct FieldRef<'a> {
-    field: &'a str,
     access: &'a dyn FieldAccess,
+    field: &'a str,
 }
 
 impl<'a> FieldRef<'a> {
-    fn new(field: &'a str, access: &'a dyn FieldAccess) -> Self {
-        FieldRef { field, access }
+    fn new(access: &'a dyn FieldAccess, field: &'a str) -> Self {
+        FieldRef { access, field }
     }
 
     immutable_field_methods!();
 }
 
 pub struct FieldMut<'a> {
-    field: &'a str,
     access: &'a mut dyn FieldAccess,
+    field: &'a str,
 }
 
 impl<'a> FieldMut<'a> {
-    fn new(field: &'a str, access: &'a mut dyn FieldAccess) -> Self {
-        FieldMut { field, access }
+    fn new(access: &'a mut dyn FieldAccess, field: &'a str) -> Self {
+        FieldMut { access, field }
     }
 
     immutable_field_methods!();
