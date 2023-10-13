@@ -101,43 +101,6 @@ impl dyn FieldAccess {
     }
 }
 
-macro_rules! forward_dyn_methods {
-    () => {
-        #[inline]
-        pub fn get<T: Any>(&self, field: &str) -> Result<&T, AccessError> {
-            <dyn FieldAccess>::get(self, field)
-        }
-
-        #[inline]
-        pub fn get_mut<T: Any>(&mut self, field: &str) -> Result<&mut T, AccessError> {
-            <dyn FieldAccess>::get_mut(self, field)
-        }
-
-        #[inline]
-        pub fn set<T: Any>(&mut self, field: &str, value: T) -> Result<(), AccessError> {
-            <dyn FieldAccess>::set(self, field, value)
-        }
-
-        #[inline]
-        pub fn replace<T: Any>(&mut self, field: &str, value: T) -> Result<T, AccessError> {
-            <dyn FieldAccess>::replace(self, field, value)
-        }
-
-        #[inline]
-        pub fn take<T: Any + Default>(&mut self, field: &str) -> Result<T, AccessError> {
-            <dyn FieldAccess>::take(self, field)
-        }
-    };
-}
-
-impl dyn FieldAccess + Send {
-    forward_dyn_methods!();
-}
-
-impl dyn FieldAccess + Send + Sync {
-    forward_dyn_methods!();
-}
-
 macro_rules! match_downcast_ref {
     ($value:expr, $($($ty:ty)|+ => $map:expr),* $(,)?) => {{
         $($(if let Some(value) = $value.downcast_ref::<$ty>().and_then($map) {
