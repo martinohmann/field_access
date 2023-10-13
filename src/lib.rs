@@ -56,22 +56,6 @@ pub trait FieldAccess: Any {
     {
         FieldMut::new(field, self)
     }
-
-    #[inline]
-    fn as_dyn_field_access(&self) -> &dyn FieldAccess
-    where
-        Self: Sized,
-    {
-        self
-    }
-
-    #[inline]
-    fn as_dyn_field_access_mut(&mut self) -> &mut dyn FieldAccess
-    where
-        Self: Sized,
-    {
-        self
-    }
 }
 
 impl dyn FieldAccess {
