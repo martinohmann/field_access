@@ -146,12 +146,14 @@ impl<T> FieldAccess for T where T: AnyFieldAccess {}
 impl dyn FieldAccess {
     #[inline]
     pub fn get<T: Any>(&self, field: &str) -> Result<&T, AccessError> {
-        self.field_as_any(field).and_then(try_downcast_ref)
+        self.field_as_any(field)
+            .and_then(|value| value.downcast_ref().ok_or(AccessError::TypeMismatch))
     }
 
     #[inline]
     pub fn get_mut<T: Any>(&mut self, field: &str) -> Result<&mut T, AccessError> {
-        self.field_as_any_mut(field).and_then(try_downcast_mut)
+        self.field_as_any_mut(field)
+            .and_then(|value| value.downcast_mut().ok_or(AccessError::TypeMismatch))
     }
 
     #[inline]
@@ -389,14 +391,4 @@ impl<'a> FieldMut<'a> {
     pub fn take<T: Any + Default>(&mut self) -> Result<T, AccessError> {
         self.access.take(self.field)
     }
-}
-
-#[inline]
-fn try_downcast_ref<T: Any>(value: &dyn Any) -> Result<&T, AccessError> {
-    value.downcast_ref().ok_or(AccessError::TypeMismatch)
-}
-
-#[inline]
-fn try_downcast_mut<T: Any>(value: &mut dyn Any) -> Result<&mut T, AccessError> {
-    value.downcast_mut().ok_or(AccessError::TypeMismatch)
 }
