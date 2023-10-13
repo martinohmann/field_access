@@ -61,12 +61,51 @@ pub trait AnyFieldAccess: Any {
 }
 
 /// High-level struct field access.
+///
+/// This trait is automatically implemented by any type implementing
+/// [`AnyFieldAccess`](AnyFieldAccess). See its documentation for more details.
 pub trait FieldAccess: AnyFieldAccess {
+    /// Returns `true` if a struct has a certain field.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::FieldAccess;
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let foo = Foo { a: 1 };
+    ///
+    /// assert!(foo.has_field("a"));
+    /// assert!(!foo.has_field("b"));
+    /// ```
     #[inline]
     fn has_field(&self, field: &str) -> bool {
         self.field_as_any(field).is_ok()
     }
 
+    /// Immutable field access.
+    ///
+    /// The returned [`FieldRef`](FieldRef) provides methods to immutably interact with the field.
+    /// See its documentation for more.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::FieldAccess;
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let foo = Foo { a: 1 };
+    ///
+    /// assert!(foo.field("a").is_u8());
+    /// ```
     #[inline]
     fn field<'a>(&'a self, field: &'a str) -> FieldRef<'a>
     where
@@ -75,6 +114,24 @@ pub trait FieldAccess: AnyFieldAccess {
         FieldRef::new(field, self)
     }
 
+    /// Mutable field access.
+    ///
+    /// The returned [`FieldMut`](FieldMut) provides methods to mutably and immutably interact
+    /// with the field. See its documentation for more.
+    ///
+    /// ```
+    /// use field_access::FieldAccess;
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let mut foo = Foo { a: 1 };
+    ///
+    /// assert_eq!(foo.field_mut("a").replace(2u8), Ok(1));
+    /// assert_eq!(foo.a, 2);
+    /// ```
     #[inline]
     fn field_mut<'a>(&'a mut self, field: &'a str) -> FieldMut<'a>
     where
