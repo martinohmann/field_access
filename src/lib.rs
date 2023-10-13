@@ -36,16 +36,6 @@ impl fmt::Display for AccessError {
 #[cfg(feature = "std")]
 impl std::error::Error for AccessError {}
 
-macro_rules! first_ok {
-    ($value:expr, $($ty:ty => $map:expr),*) => {{
-        $(if let Some(value) = $value.downcast_ref::<$ty>().map($map) {
-            return Ok(value);
-        })*
-
-        return Err(AccessError::TypeMismatch);
-    }};
-}
-
 pub trait FieldAccess: Any {
     fn get_field(&self, field: &str) -> Result<&dyn Any, AccessError>;
 
@@ -148,30 +138,78 @@ impl dyn FieldAccess + Send + Sync {
     forward_dyn_methods!();
 }
 
-macro_rules! primitive_getters {
-    () => {};
-    ($ty:ty $(,$rest:tt)*) => {
-        primitive_getters!($ty => $ty $(,$rest)*);
+macro_rules! match_downcast_ref {
+    ($value:expr, $($($ty:ty)|+ => $map:expr),* $(,)?) => {{
+        $($(if let Some(value) = $value.downcast_ref::<$ty>().and_then($map) {
+            return Ok(value);
+        })*)*
+
+        return Err(AccessError::TypeMismatch);
+    }};
+}
+
+macro_rules! primitive_getter {
+    ($ty:ty { $($rest:tt)+ }) => {
+        primitive_getter!($ty => $ty { $($rest)* });
     };
-    ($ty:ty => $ident:tt $(,$rest:tt)*) => {
+    ($ty:ty => $ident:tt { $($rest:tt)+ }) => {
         paste! {
+            /// Returns `true` if the field value is of type
+            #[doc = concat!("`", stringify!($ty), r"`.")]
             #[inline]
             pub fn [<is_ $ident>](&self) -> bool {
-                self.[<as_ $ident>]().is_ok()
+                self.is::<$ty>()
             }
 
+            /// Returns the field value as
+            #[doc = concat!("`", stringify!($ty), "`")]
+            /// .
+            ///
+            /// This method is guaranteed to return `Ok(_)` if
+            #[doc = concat!("[`.is_", stringify!($ident), "()`][Self::is_", stringify!($ident) ,"]")]
+            /// returns `true`.
+            ///
+            /// It may also return `Ok(_)` if it is possible to perform a lossless conversion of
+            /// the field's value into
+            #[doc = concat!("`", stringify!($ty), "`")]
+            /// .
+            ///
+            /// # Errors
+            ///
+            /// See the documentation of [`AccessError`][AccessError].
             #[inline]
             pub fn [<as_ $ident>](&self) -> Result<$ty, AccessError> {
-                self.access.get(self.field).map(deref)
+                self.access.get_field(self.field).and_then(|value| {
+                    match_downcast_ref!(
+                        value,
+                        $($rest)*
+                    )
+                })
             }
         }
-
-        primitive_getters!($($rest),*);
     };
 }
 
-macro_rules! getters {
+macro_rules! primitive_getters {
+    () => {};
+    ($ty:ty { $($body:tt)* } $($rest:tt)*) => {
+        primitive_getters!($ty => $ty { $($body)* } $($rest)*);
+    };
+    ($ty:ty => $ident:tt { $($body:tt)* } $($rest:tt)*) => {
+        primitive_getter!($ty => $ident { $($body)* });
+        primitive_getters!($($rest)*);
+    };
+}
+
+macro_rules! immutable_field_methods {
     () => {
+        #[inline]
+        pub fn is<T: Any>(&self) -> bool {
+            self.access.get_field(self.field)
+                       .map(|field| field.is::<T>())
+                       .unwrap_or(false)
+        }
+
         #[inline]
         pub fn get<T: Any>(&self) -> Result<&T, AccessError> {
             self.access.get(self.field)
@@ -179,38 +217,93 @@ macro_rules! getters {
 
         #[cfg(feature = "alloc")]
         #[inline]
-        pub fn get_slice<T: Any>(&self) -> Result<&[T], AccessError> {
-            self.access.get_field(self.field)
-                       .and_then(|value| first_ok!(value, &[T] => deref, Vec<T> => Vec::as_slice))
+        pub fn as_slice<T: Any>(&self) -> Result<&[T], AccessError> {
+            self.access.get_field(self.field).and_then(|value| {
+                match_downcast_ref!(
+                    value,
+                    &[T] => |&v| Some(v),
+                    Vec<T> => |v| Some(v.as_slice())
+                )
+            })
         }
 
         #[cfg(not(feature = "alloc"))]
         #[inline]
-        pub fn get_slice<T: Any>(&self) -> Result<&[T], AccessError> {
-            self.access.get(self.field).map(deref)
-        }
-
-        #[inline]
-        pub fn is_str(&self) -> bool {
-            self.as_str().is_ok()
+        pub fn as_slice<T: Any>(&self) -> Result<&[T], AccessError> {
+            self.access.get(self.field).map(|&v| v)
         }
 
         #[cfg(feature = "alloc")]
-        #[inline]
-        pub fn as_str(&self) -> Result<&str, AccessError> {
-            self.access.get_field(self.field)
-                       .and_then(|value| first_ok!(value, &str => deref, String => String::as_str))
+        primitive_getters! {
+            &str => str {
+                &str => |&v| Some(v),
+                String => |v| Some(v.as_str())
+            }
         }
 
         #[cfg(not(feature = "alloc"))]
-        #[inline]
-        pub fn as_str(&self) -> Result<&str, AccessError> {
-            self.access.get(self.field).map(deref)
+        primitive_getters! {
+            &str => str {
+                &str => |&v| Some(v)
+            }
         }
 
-        primitive_getters!(u8, u16, u32, u64, u128);
-        primitive_getters!(i8, i16, i32, i64, i128);
-        primitive_getters!(f32, f64);
+        primitive_getters! {
+            u8 {
+                u8 => |&v| Some(v),
+                u16 | u32 | u64 | u128 => |&v| v.try_into().ok(),
+            }
+            u16 {
+                u16 => |&v| Some(v),
+                u8 => |&v| Some(v.into()),
+                u32 | u64 | u128 => |&v| v.try_into().ok(),
+            }
+            u32 {
+                u32 => |&v| Some(v),
+                u8 | u16 => |&v| Some(v.into()),
+                u64 | u128 => |&v| v.try_into().ok(),
+            }
+            u64 {
+                u64 => |&v| Some(v),
+                u8 | u16 | u32 => |&v| Some(v.into()),
+                u128 => |&v| v.try_into().ok(),
+            }
+            u128 {
+                u128 => |&v| Some(v),
+                u8 | u16 | u32 | u64 => |&v| Some(v.into()),
+            }
+            i8 {
+                i8 => |&v| Some(v),
+                i16 | i32 | i64 | i128 => |&v| v.try_into().ok(),
+            }
+            i16 {
+                i16 => |&v| Some(v),
+                i8 => |&v| Some(v.into()),
+                i32 | i64 | i128 => |&v| v.try_into().ok(),
+            }
+            i32 {
+                i32 => |&v| Some(v),
+                i8 | i16 => |&v| Some(v.into()),
+                i64 | i128 => |&v| v.try_into().ok(),
+            }
+            i64 {
+                i64 => |&v| Some(v),
+                i8 | i16 | i32 => |&v| Some(v.into()),
+                i128 => |&v| v.try_into().ok(),
+            }
+            i128 {
+                i128 => |&v| Some(v),
+                i8 | i16 | i32 | i64 => |&v| Some(v.into()),
+            }
+            f32 {
+                f32 => |&v| Some(v),
+                f64 => |&v| Some(v as f32),
+            }
+            f64 {
+                f64 => |&v| Some(v),
+                f32 => |&v| Some(v.into()),
+            }
+        }
     };
 }
 
@@ -224,7 +317,7 @@ impl<'a> FieldRef<'a> {
         FieldRef { field, access }
     }
 
-    getters!();
+    immutable_field_methods!();
 }
 
 pub struct FieldMut<'a> {
@@ -237,7 +330,7 @@ impl<'a> FieldMut<'a> {
         FieldMut { field, access }
     }
 
-    getters!();
+    immutable_field_methods!();
 
     #[inline]
     pub fn get_mut<T: Any>(&mut self) -> Result<&mut T, AccessError> {
@@ -268,9 +361,4 @@ fn try_downcast_ref<T: Any>(value: &dyn Any) -> Result<&T, AccessError> {
 #[inline]
 fn try_downcast_mut<T: Any>(value: &mut dyn Any) -> Result<&mut T, AccessError> {
     value.downcast_mut().ok_or(AccessError::TypeMismatch)
-}
-
-#[inline]
-fn deref<T: Copy>(t: &T) -> T {
-    *t
 }
