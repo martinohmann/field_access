@@ -1,5 +1,6 @@
 #![doc = include_str!("../README.md")]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![warn(missing_docs)]
 #![no_std]
 
 #[cfg(feature = "alloc")]
@@ -364,6 +365,26 @@ impl<'a> FieldRef<'a> {
         self.access.field_as_any(self.field)
     }
 
+    /// Tries to obtain an the value as `&[T]`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::{AccessError, FieldAccess};
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: Vec<u8>
+    /// }
+    ///
+    /// let foo = Foo { a: vec![1, 2, 3] };
+    ///
+    /// assert_eq!(foo.field("a").as_slice(), Ok(foo.a.as_slice()));
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// See the documentation of [`AccessError`][AccessError].
     #[cfg(feature = "alloc")]
     #[inline]
     pub fn as_slice<T: Any>(&self) -> Result<&[T], AccessError> {
@@ -376,6 +397,26 @@ impl<'a> FieldRef<'a> {
         })
     }
 
+    /// Tries to obtain an the value as `&[T]`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::{AccessError, FieldAccess};
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: &'static [u8]
+    /// }
+    ///
+    /// let foo = Foo { a: &[1, 2, 3] };
+    ///
+    /// assert_eq!(foo.field("a").as_slice(), Ok(foo.a));
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// See the documentation of [`AccessError`][AccessError].
     #[cfg(not(feature = "alloc"))]
     #[inline]
     pub fn as_slice<T: Any>(&self) -> Result<&[T], AccessError> {
