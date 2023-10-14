@@ -159,20 +159,6 @@ pub trait FieldAccess: AnyFieldAccess {
 
 impl<T> FieldAccess for T where T: AnyFieldAccess {}
 
-impl dyn FieldAccess {
-    #[inline]
-    fn get<T: Any>(&self, field: &str) -> Result<&T, AccessError> {
-        self.field_as_any(field)
-            .and_then(|value| value.downcast_ref().ok_or(AccessError::TypeMismatch))
-    }
-
-    #[inline]
-    fn get_mut<T: Any>(&mut self, field: &str) -> Result<&mut T, AccessError> {
-        self.field_as_any_mut(field)
-            .and_then(|value| value.downcast_mut().ok_or(AccessError::TypeMismatch))
-    }
-}
-
 macro_rules! match_downcast_ref {
     ($value:expr, $($($ty:ty)|+ => $map:expr),* $(,)?) => {{
         $($(if let Some(value) = $value.downcast_ref::<$ty>().and_then($map) {
@@ -242,12 +228,12 @@ macro_rules! primitive_getters {
 ///
 /// Values of this type are created by [`FieldAccess::field`].
 pub struct FieldRef<'a> {
-    access: &'a dyn FieldAccess,
+    access: &'a dyn AnyFieldAccess,
     field: &'a str,
 }
 
 impl<'a> FieldRef<'a> {
-    fn new(access: &'a dyn FieldAccess, field: &'a str) -> Self {
+    fn new(access: &'a dyn AnyFieldAccess, field: &'a str) -> Self {
         FieldRef { access, field }
     }
 
@@ -376,7 +362,8 @@ impl<'a> FieldRef<'a> {
     /// See the documentation of [`AccessError`].
     #[inline]
     pub fn get<T: Any>(&self) -> Result<&T, AccessError> {
-        self.access.get(self.field)
+        self.as_any()
+            .and_then(|value| value.downcast_ref().ok_or(AccessError::TypeMismatch))
     }
 
     /// Tries to obtain an immutable reference to the value as `&dyn Any`.
@@ -549,12 +536,12 @@ impl<'a> FieldRef<'a> {
 ///
 /// Values of this type are created by [`FieldAccess::field_mut`].
 pub struct FieldMut<'a> {
-    access: &'a mut dyn FieldAccess,
+    access: &'a mut dyn AnyFieldAccess,
     field: &'a str,
 }
 
 impl<'a> FieldMut<'a> {
-    fn new(access: &'a mut dyn FieldAccess, field: &'a str) -> Self {
+    fn new(access: &'a mut dyn AnyFieldAccess, field: &'a str) -> Self {
         FieldMut { access, field }
     }
 
@@ -611,7 +598,8 @@ impl<'a> FieldMut<'a> {
     /// See the documentation of [`AccessError`].
     #[inline]
     pub fn get_mut<T: Any>(&mut self) -> Result<&mut T, AccessError> {
-        self.access.get_mut(self.field)
+        self.as_any_mut()
+            .and_then(|value| value.downcast_mut().ok_or(AccessError::TypeMismatch))
     }
 
     /// Tries to obtain a mutable reference to the value as `&mut dyn Any`.
@@ -759,12 +747,12 @@ impl<'a> FieldMut<'a> {
 /// Values of this type are created by [`FieldAccess::fields`].
 #[derive(Clone)]
 pub struct Fields<'a> {
-    access: &'a dyn FieldAccess,
+    access: &'a dyn AnyFieldAccess,
     field_names: slice::Iter<'a, &'static str>,
 }
 
 impl<'a> Fields<'a> {
-    fn new(access: &'a dyn FieldAccess) -> Self {
+    fn new(access: &'a dyn AnyFieldAccess) -> Self {
         Fields {
             access,
             field_names: access.field_names().iter(),
