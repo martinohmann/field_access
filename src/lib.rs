@@ -171,27 +171,6 @@ impl dyn FieldAccess {
         self.field_as_any_mut(field)
             .and_then(|value| value.downcast_mut().ok_or(AccessError::TypeMismatch))
     }
-
-    #[inline]
-    fn set<T: Any>(&mut self, field: &str, value: T) -> Result<(), AccessError> {
-        self.replace(field, value).map(|_| ())
-    }
-
-    #[inline]
-    fn replace<T: Any>(&mut self, field: &str, value: T) -> Result<T, AccessError> {
-        self.get_mut(field)
-            .map(|dest| core::mem::replace(dest, value))
-    }
-
-    #[inline]
-    fn swap<T: Any>(&mut self, field: &str, value: &mut T) -> Result<(), AccessError> {
-        self.get_mut(field).map(|dest| core::mem::swap(dest, value))
-    }
-
-    #[inline]
-    fn take<T: Any + Default>(&mut self, field: &str) -> Result<T, AccessError> {
-        self.replace(field, T::default())
-    }
 }
 
 macro_rules! match_downcast_ref {
@@ -235,7 +214,7 @@ macro_rules! primitive_getter {
             /// See the documentation of [`AccessError`].
             #[inline]
             pub fn [<as_ $ident>](&self) -> Result<$ty, AccessError> {
-                self.access.field_as_any(self.field).and_then(|value| {
+                self.as_any().and_then(|value| {
                     match_downcast_ref!(
                         value,
                         $($rest)*
@@ -317,10 +296,7 @@ impl<'a> FieldRef<'a> {
     /// ```
     #[inline]
     pub fn is<T: Any>(&self) -> bool {
-        self.access
-            .field_as_any(self.field)
-            .map(<dyn Any>::is::<T>)
-            .unwrap_or(false)
+        self.as_any().map_or(false, <dyn Any>::is::<T>)
     }
 
     /// Returns `true` if the field exists.
@@ -344,7 +320,7 @@ impl<'a> FieldRef<'a> {
     /// ```
     #[inline]
     pub fn exists(&self) -> bool {
-        self.access.field_as_any(self.field).is_ok()
+        self.as_any().is_ok()
     }
 
     /// Gets the `TypeId` of the field's value.
@@ -370,7 +346,7 @@ impl<'a> FieldRef<'a> {
     /// See the documentation of [`AccessError`].
     #[inline]
     pub fn type_id(&self) -> Result<TypeId, AccessError> {
-        self.access.field_as_any(self.field).map(<dyn Any>::type_id)
+        self.as_any().map(<dyn Any>::type_id)
     }
 
     /// Tries to obtain an immutable reference to the value of type `T`.
@@ -454,7 +430,7 @@ impl<'a> FieldRef<'a> {
     #[cfg(feature = "alloc")]
     #[inline]
     pub fn as_slice<T: Any>(&self) -> Result<&[T], AccessError> {
-        self.access.field_as_any(self.field).and_then(|value| {
+        self.as_any().and_then(|value| {
             match_downcast_ref!(
                 value,
                 &[T] => |&v| Some(v),
@@ -486,7 +462,7 @@ impl<'a> FieldRef<'a> {
     #[cfg(not(feature = "alloc"))]
     #[inline]
     pub fn as_slice<T: Any>(&self) -> Result<&[T], AccessError> {
-        self.access.get(self.field).map(|&v| v)
+        self.get(self.field).map(|&v| v)
     }
 
     #[cfg(feature = "alloc")]
@@ -694,7 +670,7 @@ impl<'a> FieldMut<'a> {
     /// See the documentation of [`AccessError`].
     #[inline]
     pub fn set<T: Any>(&mut self, value: T) -> Result<(), AccessError> {
-        self.access.set(self.field, value)
+        self.replace(value).map(|_| ())
     }
 
     /// Replaces the value of the field, returning the previous value.
@@ -720,7 +696,7 @@ impl<'a> FieldMut<'a> {
     /// See the documentation of [`AccessError`].
     #[inline]
     pub fn replace<T: Any>(&mut self, value: T) -> Result<T, AccessError> {
-        self.access.replace(self.field, value)
+        self.get_mut().map(|dest| core::mem::replace(dest, value))
     }
 
     /// Swaps the value of the field and another mutable location.
@@ -748,7 +724,7 @@ impl<'a> FieldMut<'a> {
     /// See the documentation of [`AccessError`].
     #[inline]
     pub fn swap<T: Any>(&mut self, value: &mut T) -> Result<(), AccessError> {
-        self.access.swap(self.field, value)
+        self.get_mut().map(|dest| core::mem::swap(dest, value))
     }
 
     /// Takes the value of the field, replacing it with its default value.
@@ -774,7 +750,7 @@ impl<'a> FieldMut<'a> {
     /// See the documentation of [`AccessError`].
     #[inline]
     pub fn take<T: Any + Default>(&mut self) -> Result<T, AccessError> {
-        self.access.take(self.field)
+        self.replace(T::default())
     }
 }
 
