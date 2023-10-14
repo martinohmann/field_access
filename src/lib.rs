@@ -15,7 +15,7 @@ extern crate std;
 use alloc::string::String;
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
-use core::any::Any;
+use core::any::{Any, TypeId};
 use core::fmt;
 use paste::paste;
 
@@ -294,6 +294,32 @@ impl<'a> FieldRef<'a> {
     #[inline]
     pub fn exists(&self) -> bool {
         self.access.field_as_any(self.field).is_ok()
+    }
+
+    /// Gets the `TypeId` of the field's value.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use core::any::TypeId;
+    /// use field_access::FieldAccess;
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let foo = Foo { a: 1 };
+    ///
+    /// assert_eq!(foo.field("a").type_id(), Ok(TypeId::of::<u8>()));
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// See the documentation of [`AccessError`][AccessError].
+    #[inline]
+    pub fn type_id(&self) -> Result<TypeId, AccessError> {
+        self.access.field_as_any(self.field).map(<dyn Any>::type_id)
     }
 
     /// Tries to obtain an immutable reference to the value of type `T`.
