@@ -18,13 +18,13 @@ pub fn derive(input: &DeriveInput) -> Result<TokenStream> {
 
     let immutable_arms = fields.iter().map(|(name, name_str)| {
         quote!(#name_str => {
-            Ok(&self.#name as &dyn ::core::any::Any)
+            Some(&self.#name as &dyn ::core::any::Any)
         })
     });
 
     let mutable_arms = fields.iter().map(|(name, name_str)| {
         quote!(#name_str => {
-            Ok(&mut self.#name as &mut dyn ::core::any::Any)
+            Some(&mut self.#name as &mut dyn ::core::any::Any)
         })
     });
 
@@ -32,17 +32,17 @@ pub fn derive(input: &DeriveInput) -> Result<TokenStream> {
 
     Ok(quote! {
         impl #impl_generics ::field_access::AnyFieldAccess for #name #ty_generics #where_clause {
-            fn field_as_any(&self, field: &str) -> ::core::result::Result<&dyn ::core::any::Any, ::field_access::AccessError> {
+            fn field_as_any(&self, field: &str) -> ::core::option::Option<&dyn ::core::any::Any> {
                 match field {
                     #(#immutable_arms)*
-                    _ => Err(::field_access::AccessError::NoSuchField)
+                    _ => None
                 }
             }
 
-            fn field_as_any_mut(&mut self, field: &str) -> ::core::result::Result<&mut dyn ::core::any::Any, ::field_access::AccessError> {
+            fn field_as_any_mut(&mut self, field: &str) -> ::core::option::Option<&mut dyn ::core::any::Any> {
                 match field {
                     #(#mutable_arms)*
-                    _ => Err(::field_access::AccessError::NoSuchField)
+                    _ => None
                 }
             }
 

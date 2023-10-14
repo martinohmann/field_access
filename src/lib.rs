@@ -53,18 +53,10 @@ impl std::error::Error for AccessError {}
 /// dynamic field access.
 pub trait AnyFieldAccess: Any {
     /// Provides an immutable reference to a struct field.
-    ///
-    /// # Errors
-    ///
-    /// See the documentation of [`AccessError`].
-    fn field_as_any(&self, field: &str) -> Result<&dyn Any, AccessError>;
+    fn field_as_any(&self, field: &str) -> Option<&dyn Any>;
 
     /// Provides a mutable reference to a struct field.
-    ///
-    /// # Errors
-    ///
-    /// See the documentation of [`AccessError`].
-    fn field_as_any_mut(&mut self, field: &str) -> Result<&mut dyn Any, AccessError>;
+    fn field_as_any_mut(&mut self, field: &str) -> Option<&mut dyn Any>;
 
     /// Provides the names of all accessible fields.
     fn field_names(&self) -> &'static [&'static str];
@@ -391,7 +383,9 @@ impl<'a> FieldRef<'a> {
     /// See the documentation of [`AccessError`].
     #[inline]
     pub fn as_any(&self) -> Result<&dyn Any, AccessError> {
-        self.access.field_as_any(self.field)
+        self.access
+            .field_as_any(self.field)
+            .ok_or(AccessError::NoSuchField)
     }
 
     /// Tries to obtain an the value as `&[T]`.
@@ -631,7 +625,9 @@ impl<'a> FieldMut<'a> {
     /// See the documentation of [`AccessError`].
     #[inline]
     pub fn as_any_mut(&mut self) -> Result<&mut dyn Any, AccessError> {
-        self.access.field_as_any_mut(self.field)
+        self.access
+            .field_as_any_mut(self.field)
+            .ok_or(AccessError::NoSuchField)
     }
 
     /// Sets the value of the field.
