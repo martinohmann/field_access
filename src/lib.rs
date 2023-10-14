@@ -538,16 +538,80 @@ impl<'a> FieldMut<'a> {
         self.access.field_as_any_mut(self.field)
     }
 
+    /// Sets the value of the field.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::{AccessError, FieldAccess};
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let mut foo = Foo { a: 1 };
+    ///
+    /// foo.field_mut("a").set(42u8).unwrap();
+    ///
+    /// assert_eq!(foo.a, 42);
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// See the documentation of [`AccessError`][AccessError].
     #[inline]
     pub fn set<T: Any>(&mut self, value: T) -> Result<(), AccessError> {
         self.access.set(self.field, value)
     }
 
+    /// Replaces the value of the field, returning the previous value.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::{AccessError, FieldAccess};
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let mut foo = Foo { a: 1 };
+    ///
+    /// assert_eq!(foo.field_mut("a").replace(42u8), Ok(1));
+    /// assert_eq!(foo.a, 42);
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// See the documentation of [`AccessError`][AccessError].
     #[inline]
     pub fn replace<T: Any>(&mut self, value: T) -> Result<T, AccessError> {
         self.access.replace(self.field, value)
     }
 
+    /// Takes the value of the field, replacing it with its default value.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::{AccessError, FieldAccess};
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let mut foo = Foo { a: 42 };
+    ///
+    /// assert_eq!(foo.field_mut("a").take(), Ok(42u8));
+    /// assert_eq!(foo.a, 0);
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// See the documentation of [`AccessError`][AccessError].
     #[inline]
     pub fn take<T: Any + Default>(&mut self) -> Result<T, AccessError> {
         self.access.take(self.field)
