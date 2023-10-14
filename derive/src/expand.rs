@@ -14,6 +14,8 @@ pub fn derive(input: &DeriveInput) -> Result<TokenStream> {
         })
         .collect();
 
+    let field_names = fields.iter().map(|(_, name_str)| quote!(#name_str));
+
     let immutable_arms = fields.iter().map(|(name, name_str)| {
         quote!(#name_str => {
             Ok(&self.#name as &dyn ::core::any::Any)
@@ -42,6 +44,10 @@ pub fn derive(input: &DeriveInput) -> Result<TokenStream> {
                     #(#mutable_arms)*
                     _ => Err(::field_access::AccessError::NoSuchField)
                 }
+            }
+
+            fn field_names(&self) -> &'static [&'static str] {
+                &[#(#field_names),*]
             }
         }
     })

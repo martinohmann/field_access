@@ -17,6 +17,8 @@ use alloc::string::String;
 use alloc::vec::Vec;
 use core::any::{Any, TypeId};
 use core::fmt;
+use core::iter::FusedIterator;
+use core::slice;
 use paste::paste;
 
 pub use field_access_derive::*;
@@ -64,6 +66,9 @@ pub trait AnyFieldAccess: Any {
     ///
     /// See the documentation of [`AccessError`][AccessError].
     fn field_as_any_mut(&mut self, field: &str) -> Result<&mut dyn Any, AccessError>;
+
+    /// Provides the names of all accessible fields.
+    fn field_names(&self) -> &'static [&'static str];
 }
 
 /// High-level struct field access.
@@ -122,6 +127,34 @@ pub trait FieldAccess: AnyFieldAccess {
         Self: Sized,
     {
         FieldMut::new(self, field)
+    }
+
+    /// Returns an iterator over all struct fields.
+    ///
+    /// ```
+    /// use field_access::FieldAccess;
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8,
+    ///     b: u16,
+    ///     c: u32
+    /// }
+    ///
+    /// let foo = Foo { a: 1, b: 2, c: 3 };
+    /// let tuples: Vec<_> = foo.fields()
+    ///                         .map(|field| (field.name().to_owned(), field.as_u8()))
+    ///                         .collect();
+    /// assert_eq!(tuples, &[(String::from("a"), Ok(1)),
+    ///                      (String::from("b"), Ok(2)),
+    ///                      (String::from("c"), Ok(3))])
+    /// ```
+    #[inline]
+    fn fields(&self) -> Fields<'_>
+    where
+        Self: Sized,
+    {
+        Fields::new(self)
     }
 }
 
@@ -748,3 +781,44 @@ impl<'a> FieldMut<'a> {
         self.access.take(self.field)
     }
 }
+
+/// An immutable iterator over all fields of a struct.
+///
+/// Values of this type are created by [`FieldAccess::fields`](FieldAccess::fields).
+#[derive(Clone)]
+pub struct Fields<'a> {
+    access: &'a dyn FieldAccess,
+    field_names: slice::Iter<'a, &'static str>,
+}
+
+impl<'a> Fields<'a> {
+    fn new(access: &'a dyn FieldAccess) -> Self {
+        Fields {
+            access,
+            field_names: access.field_names().iter(),
+        }
+    }
+}
+
+impl<'a> Iterator for Fields<'a> {
+    type Item = FieldRef<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let name = self.field_names.next()?;
+        Some(FieldRef::new(self.access, name))
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.field_names.size_hint()
+    }
+}
+
+impl<'a> DoubleEndedIterator for Fields<'a> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        let name = self.field_names.next()?;
+        Some(FieldRef::new(self.access, name))
+    }
+}
+
+impl<'a> ExactSizeIterator for Fields<'a> {}
+impl<'a> FusedIterator for Fields<'a> {}
