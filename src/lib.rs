@@ -221,6 +221,10 @@ macro_rules! primitive_getters {
 }
 
 /// An immutable struct field reference.
+///
+/// A `FieldRef` is a proxy for immutable operations on a struct's field.
+///
+/// Values of this type are created by [`FieldAccess::field`](FieldAccess::field).
 pub struct FieldRef<'a> {
     access: &'a dyn FieldAccess,
     field: &'a str,
@@ -479,6 +483,10 @@ impl<'a> FieldRef<'a> {
 }
 
 /// A mutable struct field reference.
+///
+/// A `FieldMut` is a proxy for mutable operations on a struct's field.
+///
+/// Values of this type are created by [`FieldAccess::field_mut`](FieldAccess::field_mut).
 pub struct FieldMut<'a> {
     access: &'a mut dyn FieldAccess,
     field: &'a str,
