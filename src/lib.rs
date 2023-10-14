@@ -71,28 +71,6 @@ pub trait AnyFieldAccess: Any {
 /// This trait is automatically implemented by any type implementing
 /// [`AnyFieldAccess`](AnyFieldAccess). See its documentation for more details.
 pub trait FieldAccess: AnyFieldAccess {
-    /// Returns `true` if a struct has a certain field.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use field_access::FieldAccess;
-    ///
-    /// #[derive(FieldAccess)]
-    /// struct Foo {
-    ///     a: u8
-    /// }
-    ///
-    /// let foo = Foo { a: 1 };
-    ///
-    /// assert!(foo.has_field("a"));
-    /// assert!(!foo.has_field("b"));
-    /// ```
-    #[inline]
-    fn has_field(&self, field: &str) -> bool {
-        self.field_as_any(field).is_ok()
-    }
-
     /// Immutable field access.
     ///
     /// The returned [`FieldRef`](FieldRef) provides methods to immutably interact with the field.
@@ -284,9 +262,6 @@ impl<'a> FieldRef<'a> {
 
     /// Returns `true` if the field exists.
     ///
-    /// If you don't have a `FieldRef` already, it is usually more convenient to use
-    /// [`FieldAccess::has_field`](FieldAccess::has_field) instead.
-    ///
     /// To check if the field exists and has a certain type, use [`.is::<T>()`](Self::is).
     ///
     /// # Example
@@ -306,7 +281,7 @@ impl<'a> FieldRef<'a> {
     /// ```
     #[inline]
     pub fn exists(&self) -> bool {
-        self.access.has_field(self.field)
+        self.access.field_as_any(self.field).is_ok()
     }
 
     /// Tries to obtain an immutable reference to the value of type `T`.

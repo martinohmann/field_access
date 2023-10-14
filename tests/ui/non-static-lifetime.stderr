@@ -1,0 +1,13 @@
+error[E0478]: lifetime bound not satisfied
+ --> tests/ui/non-static-lifetime.rs:3:10
+  |
+3 | #[derive(FieldAccess)]
+  |          ^^^^^^^^^^^
+  |
+note: lifetime parameter instantiated with the lifetime `'a` as defined here
+ --> tests/ui/non-static-lifetime.rs:4:16
+  |
+4 | pub struct Foo<'a> {
+  |                ^^
+  = note: but lifetime parameter must outlive the static lifetime
+  = note: this error originates in the derive macro `FieldAccess` (in Nightly builds, run with -Z macro-backtrace for more info)
