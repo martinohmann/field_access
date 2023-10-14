@@ -243,6 +243,28 @@ impl<'a> FieldRef<'a> {
         FieldRef { access, field }
     }
 
+    /// Returns the field's name.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::FieldAccess;
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let foo = Foo { a: 1 };
+    /// let field = foo.field("a");
+    ///
+    /// assert_eq!(field.name(), "a");
+    /// ```
+    #[inline]
+    pub fn name(&self) -> &str {
+        self.field
+    }
+
     /// Returns `true` if the field is of type `T`.
     ///
     /// Please note that this also returns `false` if the field does not exist.
@@ -529,6 +551,28 @@ pub struct FieldMut<'a> {
 impl<'a> FieldMut<'a> {
     fn new(access: &'a mut dyn FieldAccess, field: &'a str) -> Self {
         FieldMut { access, field }
+    }
+
+    /// Returns the field's name.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::FieldAccess;
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let foo = Foo { a: 1 };
+    /// let field = foo.field("a");
+    ///
+    /// assert_eq!(field.name(), "a");
+    /// ```
+    #[inline]
+    pub fn name(&self) -> &str {
+        self.field
     }
 
     /// Tries to obtain a mutable reference to the value of type `T`.
