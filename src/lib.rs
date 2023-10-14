@@ -462,7 +462,7 @@ impl<'a> FieldRef<'a> {
     #[cfg(not(feature = "alloc"))]
     #[inline]
     pub fn as_slice<T: Any>(&self) -> Result<&[T], AccessError> {
-        self.get(self.field).map(|&v| v)
+        self.get().map(|&v| v)
     }
 
     #[cfg(feature = "alloc")]
