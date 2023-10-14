@@ -46,9 +46,8 @@ impl std::error::Error for AccessError {}
 
 /// Low-level struct field access.
 ///
-/// This trait can be implemented to provide access to the methods of the
-/// [`FieldAccess`](FieldAccess) trait which has a blanket implementation for any type
-/// implementing `AnyFieldAccess`.
+/// This trait can be implemented to provide access to the methods of the [`FieldAccess`] trait
+/// which has a blanket implementation for any type implementing `AnyFieldAccess`.
 ///
 /// Consider automatically implementing it via `#[derive(FieldAccess)]` for structs where you need
 /// dynamic field access.
@@ -57,14 +56,14 @@ pub trait AnyFieldAccess: Any {
     ///
     /// # Errors
     ///
-    /// See the documentation of [`AccessError`][AccessError].
+    /// See the documentation of [`AccessError`].
     fn field_as_any(&self, field: &str) -> Result<&dyn Any, AccessError>;
 
     /// Provides a mutable reference to a struct field.
     ///
     /// # Errors
     ///
-    /// See the documentation of [`AccessError`][AccessError].
+    /// See the documentation of [`AccessError`].
     fn field_as_any_mut(&mut self, field: &str) -> Result<&mut dyn Any, AccessError>;
 
     /// Provides the names of all accessible fields.
@@ -74,12 +73,12 @@ pub trait AnyFieldAccess: Any {
 /// High-level struct field access.
 ///
 /// This trait is automatically implemented by any type implementing
-/// [`AnyFieldAccess`](AnyFieldAccess). See its documentation for more details.
+/// [`AnyFieldAccess`]. See its documentation for more details.
 pub trait FieldAccess: AnyFieldAccess {
     /// Immutable field access.
     ///
-    /// The returned [`FieldRef`](FieldRef) provides methods to immutably interact with the field.
-    /// See its documentation for more.
+    /// The returned [`FieldRef`] provides methods to immutably interact with the field. See its
+    /// documentation for more.
     ///
     /// # Example
     ///
@@ -105,8 +104,8 @@ pub trait FieldAccess: AnyFieldAccess {
 
     /// Mutable field access.
     ///
-    /// The returned [`FieldMut`](FieldMut) provides methods to mutably interact with the field.
-    /// See its documentation for more.
+    /// The returned [`FieldMut`] provides methods to mutably interact with the field. See its
+    /// documentation for more.
     ///
     /// ```
     /// use field_access::FieldAccess;
@@ -186,10 +185,7 @@ impl dyn FieldAccess {
 
     #[inline]
     fn swap<T: Any>(&mut self, field: &str, value: &mut T) -> Result<(), AccessError> {
-        self.get_mut(field).and_then(|dest| {
-            core::mem::swap(dest, value);
-            Ok(())
-        })
+        self.get_mut(field).map(|dest| core::mem::swap(dest, value))
     }
 
     #[inline]
@@ -236,7 +232,7 @@ macro_rules! primitive_getter {
             ///
             /// # Errors
             ///
-            /// See the documentation of [`AccessError`][AccessError].
+            /// See the documentation of [`AccessError`].
             #[inline]
             pub fn [<as_ $ident>](&self) -> Result<$ty, AccessError> {
                 self.access.field_as_any(self.field).and_then(|value| {
@@ -265,7 +261,7 @@ macro_rules! primitive_getters {
 ///
 /// A `FieldRef` is a proxy for immutable operations on a struct's field.
 ///
-/// Values of this type are created by [`FieldAccess::field`](FieldAccess::field).
+/// Values of this type are created by [`FieldAccess::field`].
 pub struct FieldRef<'a> {
     access: &'a dyn FieldAccess,
     field: &'a str,
@@ -371,7 +367,7 @@ impl<'a> FieldRef<'a> {
     ///
     /// # Errors
     ///
-    /// See the documentation of [`AccessError`][AccessError].
+    /// See the documentation of [`AccessError`].
     #[inline]
     pub fn type_id(&self) -> Result<TypeId, AccessError> {
         self.access.field_as_any(self.field).map(<dyn Any>::type_id)
@@ -401,7 +397,7 @@ impl<'a> FieldRef<'a> {
     ///
     /// # Errors
     ///
-    /// See the documentation of [`AccessError`][AccessError].
+    /// See the documentation of [`AccessError`].
     #[inline]
     pub fn get<T: Any>(&self) -> Result<&T, AccessError> {
         self.access.get(self.field)
@@ -429,7 +425,7 @@ impl<'a> FieldRef<'a> {
     ///
     /// # Errors
     ///
-    /// See the documentation of [`AccessError`][AccessError].
+    /// See the documentation of [`AccessError`].
     #[inline]
     pub fn as_any(&self) -> Result<&dyn Any, AccessError> {
         self.access.field_as_any(self.field)
@@ -454,7 +450,7 @@ impl<'a> FieldRef<'a> {
     ///
     /// # Errors
     ///
-    /// See the documentation of [`AccessError`][AccessError].
+    /// See the documentation of [`AccessError`].
     #[cfg(feature = "alloc")]
     #[inline]
     pub fn as_slice<T: Any>(&self) -> Result<&[T], AccessError> {
@@ -486,7 +482,7 @@ impl<'a> FieldRef<'a> {
     ///
     /// # Errors
     ///
-    /// See the documentation of [`AccessError`][AccessError].
+    /// See the documentation of [`AccessError`].
     #[cfg(not(feature = "alloc"))]
     #[inline]
     pub fn as_slice<T: Any>(&self) -> Result<&[T], AccessError> {
@@ -575,7 +571,7 @@ impl<'a> FieldRef<'a> {
 ///
 /// A `FieldMut` is a proxy for mutable operations on a struct's field.
 ///
-/// Values of this type are created by [`FieldAccess::field_mut`](FieldAccess::field_mut).
+/// Values of this type are created by [`FieldAccess::field_mut`].
 pub struct FieldMut<'a> {
     access: &'a mut dyn FieldAccess,
     field: &'a str,
@@ -636,7 +632,7 @@ impl<'a> FieldMut<'a> {
     ///
     /// # Errors
     ///
-    /// See the documentation of [`AccessError`][AccessError].
+    /// See the documentation of [`AccessError`].
     #[inline]
     pub fn get_mut<T: Any>(&mut self) -> Result<&mut T, AccessError> {
         self.access.get_mut(self.field)
@@ -668,7 +664,7 @@ impl<'a> FieldMut<'a> {
     ///
     /// # Errors
     ///
-    /// See the documentation of [`AccessError`][AccessError].
+    /// See the documentation of [`AccessError`].
     #[inline]
     pub fn as_any_mut(&mut self) -> Result<&mut dyn Any, AccessError> {
         self.access.field_as_any_mut(self.field)
@@ -695,7 +691,7 @@ impl<'a> FieldMut<'a> {
     ///
     /// # Errors
     ///
-    /// See the documentation of [`AccessError`][AccessError].
+    /// See the documentation of [`AccessError`].
     #[inline]
     pub fn set<T: Any>(&mut self, value: T) -> Result<(), AccessError> {
         self.access.set(self.field, value)
@@ -721,7 +717,7 @@ impl<'a> FieldMut<'a> {
     ///
     /// # Errors
     ///
-    /// See the documentation of [`AccessError`][AccessError].
+    /// See the documentation of [`AccessError`].
     #[inline]
     pub fn replace<T: Any>(&mut self, value: T) -> Result<T, AccessError> {
         self.access.replace(self.field, value)
@@ -749,7 +745,7 @@ impl<'a> FieldMut<'a> {
     ///
     /// # Errors
     ///
-    /// See the documentation of [`AccessError`][AccessError].
+    /// See the documentation of [`AccessError`].
     #[inline]
     pub fn swap<T: Any>(&mut self, value: &mut T) -> Result<(), AccessError> {
         self.access.swap(self.field, value)
@@ -775,7 +771,7 @@ impl<'a> FieldMut<'a> {
     ///
     /// # Errors
     ///
-    /// See the documentation of [`AccessError`][AccessError].
+    /// See the documentation of [`AccessError`].
     #[inline]
     pub fn take<T: Any + Default>(&mut self) -> Result<T, AccessError> {
         self.access.take(self.field)
@@ -784,7 +780,7 @@ impl<'a> FieldMut<'a> {
 
 /// An immutable iterator over all fields of a struct.
 ///
-/// Values of this type are created by [`FieldAccess::fields`](FieldAccess::fields).
+/// Values of this type are created by [`FieldAccess::fields`].
 #[derive(Clone)]
 pub struct Fields<'a> {
     access: &'a dyn FieldAccess,
