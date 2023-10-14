@@ -1,6 +1,8 @@
 #![doc = include_str!("../README.md")]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(missing_docs)]
+#![warn(clippy::pedantic)]
+#![allow(clippy::must_use_candidate)]
 #![no_std]
 
 #[cfg(feature = "alloc")]
@@ -276,7 +278,7 @@ impl<'a> FieldRef<'a> {
     pub fn is<T: Any>(&self) -> bool {
         self.access
             .field_as_any(self.field)
-            .map(|field| field.is::<T>())
+            .map(<dyn Any>::is::<T>)
             .unwrap_or(false)
     }
 
@@ -493,7 +495,6 @@ impl<'a> FieldRef<'a> {
     primitive_getters! {
         f32 {
             f32 => |&v| Some(v),
-            f64 => |&v| Some(v as f32),
         }
         f64 {
             f64 => |&v| Some(v),

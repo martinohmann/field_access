@@ -5,7 +5,7 @@ use syn::{punctuated::Punctuated, Data, DeriveInput, Error, Field, Result, Token
 pub fn derive(input: &DeriveInput) -> Result<TokenStream> {
     let name = &input.ident;
 
-    let fields: Vec<_> = fields(&input)?
+    let fields: Vec<_> = fields(input)?
         .iter()
         .map(|field| {
             let name = field.ident.as_ref().expect("field has a name");
