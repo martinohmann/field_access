@@ -250,11 +250,27 @@ impl<'a> FieldRef<'a> {
         FieldRef { access, field }
     }
 
-    /// Returns `true` if the field is if type `T`.
+    /// Returns `true` if the field is of type `T`.
     ///
     /// Please note that this also returns `false` if the field does not exist.
     ///
     /// To check for existence, use [`.exists()`](Self::exists).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::FieldAccess;
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let foo = Foo { a: 1 };
+    ///
+    /// assert!(foo.field("a").is::<u8>());
+    /// assert!(!foo.field("a").is::<&str>());
+    /// ```
     #[inline]
     pub fn is<T: Any>(&self) -> bool {
         self.access
@@ -267,6 +283,8 @@ impl<'a> FieldRef<'a> {
     ///
     /// If you don't have a `FieldRef` already, it is usually more convenient to use
     /// [`FieldAccess::has_field`](FieldAccess::has_field) instead.
+    ///
+    /// To check if the field exists and has a certain type, use [`.is::<T>()`](Self::is).
     ///
     /// # Example
     ///
