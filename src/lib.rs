@@ -152,6 +152,14 @@ impl dyn FieldAccess {
     }
 
     #[inline]
+    fn swap<T: Any>(&mut self, field: &str, value: &mut T) -> Result<(), AccessError> {
+        self.get_mut(field).and_then(|dest| {
+            core::mem::swap(dest, value);
+            Ok(())
+        })
+    }
+
+    #[inline]
     fn take<T: Any + Default>(&mut self, field: &str) -> Result<T, AccessError> {
         self.replace(field, T::default())
     }
@@ -614,6 +622,34 @@ impl<'a> FieldMut<'a> {
     #[inline]
     pub fn replace<T: Any>(&mut self, value: T) -> Result<T, AccessError> {
         self.access.replace(self.field, value)
+    }
+
+    /// Swaps the value of the field and another mutable location.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::{AccessError, FieldAccess};
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let mut foo = Foo { a: 1 };
+    /// let mut value = 2u8;
+    ///
+    /// assert_eq!(foo.field_mut("a").swap(&mut value), Ok(()));
+    /// assert_eq!(foo.a, 2);
+    /// assert_eq!(value, 1);
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// See the documentation of [`AccessError`][AccessError].
+    #[inline]
+    pub fn swap<T: Any>(&mut self, value: &mut T) -> Result<(), AccessError> {
+        self.access.swap(self.field, value)
     }
 
     /// Takes the value of the field, replacing it with its default value.
