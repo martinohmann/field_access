@@ -119,8 +119,8 @@ pub trait FieldAccess: AnyFieldAccess {
 
     /// Mutable field access.
     ///
-    /// The returned [`FieldMut`](FieldMut) provides methods to mutably and immutably interact
-    /// with the field. See its documentation for more.
+    /// The returned [`FieldMut`](FieldMut) provides methods to mutably interact with the field.
+    /// See its documentation for more.
     ///
     /// ```
     /// use field_access::FieldAccess;
@@ -239,173 +239,6 @@ macro_rules! primitive_getters {
     };
 }
 
-macro_rules! immutable_field_methods {
-    () => {
-        /// Returns `true` if the field is if type `T`.
-        ///
-        /// Please note that this also returns `false` if the field does not exist.
-        ///
-        /// To check for existence, use [`.exists()`](Self::exists).
-        #[inline]
-        pub fn is<T: Any>(&self) -> bool {
-            self.access.field_as_any(self.field)
-                       .map(|field| field.is::<T>())
-                       .unwrap_or(false)
-        }
-
-        /// Returns `true` if the field exists.
-        ///
-        /// If you don't have a `FieldRef` already, it is usually more convenient to use
-        /// [`FieldAccess::has_field`](FieldAccess::has_field) instead.
-        ///
-        /// # Example
-        ///
-        /// ```
-        /// use field_access::FieldAccess;
-        ///
-        /// #[derive(FieldAccess)]
-        /// struct Foo {
-        ///     a: u8
-        /// }
-        ///
-        /// let foo = Foo { a: 1 };
-        ///
-        /// assert!(foo.field("a").exists());
-        /// assert!(!foo.field("b").exists());
-        /// ```
-        #[inline]
-        pub fn exists(&self) -> bool {
-            self.access.has_field(self.field)
-        }
-
-        /// Tries to obtain an immutable reference to the value of type `T`.
-        ///
-        /// # Example
-        ///
-        /// ```
-        /// use field_access::{AccessError, FieldAccess};
-        ///
-        /// #[derive(FieldAccess)]
-        /// struct Foo {
-        ///     a: u8
-        /// }
-        ///
-        /// let foo = Foo { a: 42 };
-        ///
-        /// // Field `a` exists.
-        /// assert_eq!(foo.field("a").get::<u8>(), Ok(&42u8));
-        /// assert_eq!(foo.field("a").get::<&str>(), Err(AccessError::TypeMismatch));
-        ///
-        /// // Field `b` does not exist.
-        /// assert_eq!(foo.field("b").get::<&str>(), Err(AccessError::NoSuchField));
-        /// ```
-        ///
-        /// # Errors
-        ///
-        /// See the documentation of [`AccessError`][AccessError].
-        #[inline]
-        pub fn get<T: Any>(&self) -> Result<&T, AccessError> {
-            self.access.get(self.field)
-        }
-
-        #[cfg(feature = "alloc")]
-        #[inline]
-        pub fn as_slice<T: Any>(&self) -> Result<&[T], AccessError> {
-            self.access.field_as_any(self.field).and_then(|value| {
-                match_downcast_ref!(
-                    value,
-                    &[T] => |&v| Some(v),
-                    Vec<T> => |v| Some(v.as_slice())
-                )
-            })
-        }
-
-        #[cfg(not(feature = "alloc"))]
-        #[inline]
-        pub fn as_slice<T: Any>(&self) -> Result<&[T], AccessError> {
-            self.access.get(self.field).map(|&v| v)
-        }
-
-        #[cfg(feature = "alloc")]
-        primitive_getters! {
-            &str => str {
-                &str => |&v| Some(v),
-                String => |v| Some(v.as_str())
-            }
-        }
-
-        #[cfg(not(feature = "alloc"))]
-        primitive_getters! {
-            &str => str {
-                &str => |&v| Some(v)
-            }
-        }
-
-        primitive_getters! {
-            u8 {
-                u8 => |&v| Some(v),
-                u16 | u32 | u64 | u128 => |&v| v.try_into().ok(),
-            }
-            u16 {
-                u16 => |&v| Some(v),
-                u8 => |&v| Some(v.into()),
-                u32 | u64 | u128 => |&v| v.try_into().ok(),
-            }
-            u32 {
-                u32 => |&v| Some(v),
-                u16 | u8 => |&v| Some(v.into()),
-                u64 | u128 => |&v| v.try_into().ok(),
-            }
-            u64 {
-                u64 => |&v| Some(v),
-                u32 | u16 | u8 => |&v| Some(v.into()),
-                u128 => |&v| v.try_into().ok(),
-            }
-            u128 {
-                u128 => |&v| Some(v),
-                u8 | u16 | u32 | u64 => |&v| Some(v.into()),
-            }
-        }
-
-        primitive_getters! {
-            i8 {
-                i8 => |&v| Some(v),
-                i16 | i32 | i64 | i128 => |&v| v.try_into().ok(),
-            }
-            i16 {
-                i16 => |&v| Some(v),
-                i8 => |&v| Some(v.into()),
-                i32 | i64 | i128 => |&v| v.try_into().ok(),
-            }
-            i32 {
-                i32 => |&v| Some(v),
-                i16 | i8 => |&v| Some(v.into()),
-                i64 | i128 => |&v| v.try_into().ok(),
-            }
-            i64 {
-                i64 => |&v| Some(v),
-                i32 | i16 | i8 => |&v| Some(v.into()),
-                i128 => |&v| v.try_into().ok(),
-            }
-            i128 {
-                i128 => |&v| Some(v),
-                i8 | i16 | i32 | i64 => |&v| Some(v.into()),
-            }
-        }
-
-        primitive_getters! {
-            f32 {
-                f32 => |&v| Some(v),
-                f64 => |&v| Some(v as f32),
-            }
-            f64 {
-                f64 => |&v| Some(v),
-                f32 => |&v| Some(v.into()),
-            }
-        }
-    };
-}
-
 /// An immutable struct field reference.
 pub struct FieldRef<'a> {
     access: &'a dyn FieldAccess,
@@ -417,7 +250,169 @@ impl<'a> FieldRef<'a> {
         FieldRef { access, field }
     }
 
-    immutable_field_methods!();
+    /// Returns `true` if the field is if type `T`.
+    ///
+    /// Please note that this also returns `false` if the field does not exist.
+    ///
+    /// To check for existence, use [`.exists()`](Self::exists).
+    #[inline]
+    pub fn is<T: Any>(&self) -> bool {
+        self.access
+            .field_as_any(self.field)
+            .map(|field| field.is::<T>())
+            .unwrap_or(false)
+    }
+
+    /// Returns `true` if the field exists.
+    ///
+    /// If you don't have a `FieldRef` already, it is usually more convenient to use
+    /// [`FieldAccess::has_field`](FieldAccess::has_field) instead.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::FieldAccess;
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let foo = Foo { a: 1 };
+    ///
+    /// assert!(foo.field("a").exists());
+    /// assert!(!foo.field("b").exists());
+    /// ```
+    #[inline]
+    pub fn exists(&self) -> bool {
+        self.access.has_field(self.field)
+    }
+
+    /// Tries to obtain an immutable reference to the value of type `T`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::{AccessError, FieldAccess};
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let foo = Foo { a: 42 };
+    ///
+    /// // Field `a` exists.
+    /// assert_eq!(foo.field("a").get::<u8>(), Ok(&42u8));
+    /// assert_eq!(foo.field("a").get::<&str>(), Err(AccessError::TypeMismatch));
+    ///
+    /// // Field `b` does not exist.
+    /// assert_eq!(foo.field("b").get::<&str>(), Err(AccessError::NoSuchField));
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// See the documentation of [`AccessError`][AccessError].
+    #[inline]
+    pub fn get<T: Any>(&self) -> Result<&T, AccessError> {
+        self.access.get(self.field)
+    }
+
+    #[cfg(feature = "alloc")]
+    #[inline]
+    pub fn as_slice<T: Any>(&self) -> Result<&[T], AccessError> {
+        self.access.field_as_any(self.field).and_then(|value| {
+            match_downcast_ref!(
+                value,
+                &[T] => |&v| Some(v),
+                Vec<T> => |v| Some(v.as_slice())
+            )
+        })
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    #[inline]
+    pub fn as_slice<T: Any>(&self) -> Result<&[T], AccessError> {
+        self.access.get(self.field).map(|&v| v)
+    }
+
+    #[cfg(feature = "alloc")]
+    primitive_getters! {
+        &str => str {
+            &str => |&v| Some(v),
+            String => |v| Some(v.as_str())
+        }
+    }
+
+    #[cfg(not(feature = "alloc"))]
+    primitive_getters! {
+        &str => str {
+            &str => |&v| Some(v)
+        }
+    }
+
+    primitive_getters! {
+        u8 {
+            u8 => |&v| Some(v),
+            u16 | u32 | u64 | u128 => |&v| v.try_into().ok(),
+        }
+        u16 {
+            u16 => |&v| Some(v),
+            u8 => |&v| Some(v.into()),
+            u32 | u64 | u128 => |&v| v.try_into().ok(),
+        }
+        u32 {
+            u32 => |&v| Some(v),
+            u16 | u8 => |&v| Some(v.into()),
+            u64 | u128 => |&v| v.try_into().ok(),
+        }
+        u64 {
+            u64 => |&v| Some(v),
+            u32 | u16 | u8 => |&v| Some(v.into()),
+            u128 => |&v| v.try_into().ok(),
+        }
+        u128 {
+            u128 => |&v| Some(v),
+            u8 | u16 | u32 | u64 => |&v| Some(v.into()),
+        }
+    }
+
+    primitive_getters! {
+        i8 {
+            i8 => |&v| Some(v),
+            i16 | i32 | i64 | i128 => |&v| v.try_into().ok(),
+        }
+        i16 {
+            i16 => |&v| Some(v),
+            i8 => |&v| Some(v.into()),
+            i32 | i64 | i128 => |&v| v.try_into().ok(),
+        }
+        i32 {
+            i32 => |&v| Some(v),
+            i16 | i8 => |&v| Some(v.into()),
+            i64 | i128 => |&v| v.try_into().ok(),
+        }
+        i64 {
+            i64 => |&v| Some(v),
+            i32 | i16 | i8 => |&v| Some(v.into()),
+            i128 => |&v| v.try_into().ok(),
+        }
+        i128 {
+            i128 => |&v| Some(v),
+            i8 | i16 | i32 | i64 => |&v| Some(v.into()),
+        }
+    }
+
+    primitive_getters! {
+        f32 {
+            f32 => |&v| Some(v),
+            f64 => |&v| Some(v as f32),
+        }
+        f64 {
+            f64 => |&v| Some(v),
+            f32 => |&v| Some(v.into()),
+        }
+    }
 }
 
 /// A mutable struct field reference.
@@ -430,8 +425,6 @@ impl<'a> FieldMut<'a> {
     fn new(access: &'a mut dyn FieldAccess, field: &'a str) -> Self {
         FieldMut { access, field }
     }
-
-    immutable_field_methods!();
 
     /// Tries to obtain a mutable reference to the value of type `T`.
     ///
