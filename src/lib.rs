@@ -336,6 +336,34 @@ impl<'a> FieldRef<'a> {
         self.access.get(self.field)
     }
 
+    /// Tries to obtain an immutable reference to the value as `&dyn Any`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::{AccessError, FieldAccess};
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let foo = Foo { a: 42 };
+    ///
+    /// let field = foo.field("a");
+    /// let any = field.as_any().unwrap();
+    ///
+    /// assert_eq!(any.downcast_ref::<u8>(), Some(&42u8));
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// See the documentation of [`AccessError`][AccessError].
+    #[inline]
+    pub fn as_any(&self) -> Result<&dyn Any, AccessError> {
+        self.access.field_as_any(self.field)
+    }
+
     #[cfg(feature = "alloc")]
     #[inline]
     pub fn as_slice<T: Any>(&self) -> Result<&[T], AccessError> {
@@ -476,6 +504,38 @@ impl<'a> FieldMut<'a> {
     #[inline]
     pub fn get_mut<T: Any>(&mut self) -> Result<&mut T, AccessError> {
         self.access.get_mut(self.field)
+    }
+
+    /// Tries to obtain a mutable reference to the value as `&mut dyn Any`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::{AccessError, FieldAccess};
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let mut foo = Foo { a: 42 };
+    ///
+    /// let mut field = foo.field_mut("a");
+    /// let any = field.as_any_mut().unwrap();
+    ///
+    /// if let Some(value) = any.downcast_mut::<u8>() {
+    ///     *value = 42;
+    /// }
+    ///
+    /// assert_eq!(foo.a, 42);
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// See the documentation of [`AccessError`][AccessError].
+    #[inline]
+    pub fn as_any_mut(&mut self) -> Result<&mut dyn Any, AccessError> {
+        self.access.field_as_any_mut(self.field)
     }
 
     #[inline]
