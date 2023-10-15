@@ -760,8 +760,9 @@ impl<'a> Iterator for Fields<'a> {
     type Item = FieldRef<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let name = self.field_names.next()?;
-        Some(FieldRef::new(self.access, name))
+        self.field_names
+            .next()
+            .map(|name| FieldRef::new(self.access, name))
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -771,8 +772,9 @@ impl<'a> Iterator for Fields<'a> {
 
 impl<'a> DoubleEndedIterator for Fields<'a> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        let name = self.field_names.next()?;
-        Some(FieldRef::new(self.access, name))
+        self.field_names
+            .next_back()
+            .map(|name| FieldRef::new(self.access, name))
     }
 }
 
