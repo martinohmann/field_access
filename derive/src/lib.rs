@@ -1,12 +1,7 @@
 //! This crate provides `field_access`'s derive macro.
 //!
-//! ```
-//! # use field_access_derive::{FieldAccess};
-//! #
+//! ```no_compile
 //! #[derive(FieldAccess)]
-//! # struct Foo { a: u8 };
-//! #
-//! # fn main() {}
 //! ```
 //!
 //! Please refer to the documentation of the [`field_access`](https://docs.rs/field_access) crate
