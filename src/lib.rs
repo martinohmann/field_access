@@ -21,6 +21,7 @@ use core::iter::FusedIterator;
 use core::slice;
 use paste::paste;
 
+#[cfg(feature = "derive")]
 pub use field_access_derive::*;
 
 /// The type returned for all errors that may occur when accessing a struct field.
