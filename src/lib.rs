@@ -551,8 +551,8 @@ impl<'a> FieldMut<'a> {
     ///     a: u8
     /// }
     ///
-    /// let foo = Foo { a: 1 };
-    /// let field = foo.field("a");
+    /// let mut foo = Foo { a: 1 };
+    /// let mut field = foo.field_mut("a");
     ///
     /// assert_eq!(field.name(), "a");
     /// ```
