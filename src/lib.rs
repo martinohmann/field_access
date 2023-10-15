@@ -21,8 +21,9 @@ use core::iter::FusedIterator;
 use core::slice;
 use paste::paste;
 
+/// Derive macro for automatically implementing [`AnyFieldAccess`] on structs.
 #[cfg(feature = "derive")]
-pub use field_access_derive::*;
+pub use field_access_derive::FieldAccess;
 
 /// The type returned for all errors that may occur when accessing a struct field.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
