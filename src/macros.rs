@@ -30,6 +30,51 @@ macro_rules! as_type_method {
     };
 }
 
+macro_rules! as_type_mut_method {
+    ($ty:ty { $example_value:expr }) => {
+        paste! {
+            #[doc = "Returns a mutable reference to the field value as `&mut " $ty "`."]
+            ///
+            #[doc = "Returns `Some(_)` if the field's value is of type `" $ty "`, `None` otherwise."]
+            ///
+            /// # Example
+            ///
+            /// ```
+            /// use field_access::FieldAccess;
+            ///
+            /// #[derive(FieldAccess, Default)]
+            /// struct Foo {
+            #[doc = "    a: " $ty ","]
+            /// }
+            ///
+            /// let mut foo = Foo::default();
+            /// let mut field = foo.field_mut("a").unwrap();
+            ///
+            #[doc = "if let Some(value) = field.as_" $ty:lower "_mut() {"]
+            #[doc = concat!("    *value = ", stringify!($example_value), ";")]
+            /// }
+            ///
+            #[doc = concat!("assert_eq!(foo.a, ", stringify!($example_value), ");")]
+            /// ```
+            #[inline]
+            pub fn [<as_ $ty:lower _mut>](&mut self) -> Option<&mut $ty> {
+                self.get_mut::<$ty>()
+            }
+        }
+    };
+    ($ty:ty) => {
+        as_type_mut_method!($ty { <$ty>::MAX });
+    };
+    ($ty:ty, $($rest:tt)+) => {
+        as_type_mut_method!($ty);
+        as_type_mut_method!($($rest)+);
+    };
+    ($ty:ty { $example_value:expr }, $($rest:tt)+) => {
+        as_type_mut_method!($ty { $example_value });
+        as_type_mut_method!($($rest)+);
+    };
+}
+
 macro_rules! is_type_method {
     ($($ty:ty),+ $(,)?) => {
         $(

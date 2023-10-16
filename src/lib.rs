@@ -663,6 +663,43 @@ impl<'a> FieldMut<'a> {
     pub fn take<T: Any + Default>(&mut self) -> Option<T> {
         self.replace(T::default())
     }
+
+    /// Returns a mutable reference to the value as `&mut Vec<T>`.
+    ///
+    /// Returns `Some(_)` if the field's value is of type `Vec<T>`, `None` otherwise.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::FieldAccess;
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: Vec<u8>
+    /// }
+    ///
+    /// let mut foo = Foo { a: vec![1, 2, 3] };
+    /// let mut field = foo.field_mut("a").unwrap();
+    ///
+    /// if let Some(vec) = field.as_vec_mut::<u8>() {
+    ///     vec.push(4);
+    /// }
+    ///
+    /// assert_eq!(foo.a, vec![1, 2, 3, 4]);
+    /// ```
+    #[cfg(feature = "alloc")]
+    #[inline]
+    pub fn as_vec_mut<T: Any>(&mut self) -> Option<&mut Vec<T>> {
+        self.get_mut::<Vec<T>>()
+    }
+
+    #[cfg(feature = "alloc")]
+    as_type_mut_method!(String { String::from("bar") });
+
+    as_type_mut_method!(bool { true });
+    as_type_mut_method!(u8, u16, u32, u64, u128);
+    as_type_mut_method!(i8, i16, i32, i64, i128);
+    as_type_mut_method!(f32, f64);
 }
 
 impl<'a> AsRef<Field<'a>> for FieldMut<'a> {
