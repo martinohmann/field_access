@@ -8,6 +8,9 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
+#[macro_use]
+mod macros;
+
 #[cfg(feature = "alloc")]
 use alloc::string::String;
 #[cfg(feature = "alloc")]
@@ -128,60 +131,6 @@ pub trait FieldAccess: AnyFieldAccess {
 }
 
 impl<T> FieldAccess for T where T: AnyFieldAccess {}
-
-macro_rules! match_downcast_ref {
-    ($value:expr, $($($ty:ty)|+ => $map:expr),* $(,)?) => {{
-        $($(if let Some(value) = $value.downcast_ref::<$ty>().and_then($map) {
-            return Some(value);
-        })*)*
-
-        return None;
-    }};
-}
-
-macro_rules! primitive_getter {
-    ($ty:ty { $($rest:tt)+ }) => {
-        primitive_getter!($ty => $ty { $($rest)* });
-    };
-    ($ty:ty => $ident:tt { $($rest:tt)+ }) => {
-        paste! {
-            /// Returns `true` if the field value is of type
-            #[doc = concat!("`", stringify!($ty), r"`.")]
-            #[inline]
-            pub fn [<is_ $ident>](&self) -> bool {
-                self.is::<$ty>()
-            }
-
-            /// Returns the field value as
-            #[doc = concat!("`", stringify!($ty), "`")]
-            /// .
-            ///
-            /// This method is guaranteed to return `Some(_)` if
-            #[doc = concat!("[`.is_", stringify!($ident), "()`][Self::is_", stringify!($ident) ,"]")]
-            /// returns `true`.
-            ///
-            /// It may also return `Some(_)` if it is possible to perform a lossless conversion of
-            /// the field's value into
-            #[doc = concat!("`", stringify!($ty), "`")]
-            /// .
-            #[inline]
-            pub fn [<as_ $ident>](&self) -> Option<$ty> {
-                match_downcast_ref!(self.value, $($rest)*)
-            }
-        }
-    };
-}
-
-macro_rules! primitive_getters {
-    () => {};
-    ($ty:ty { $($body:tt)* } $($rest:tt)*) => {
-        primitive_getters!($ty => $ty { $($body)* } $($rest)*);
-    };
-    ($ty:ty => $ident:tt { $($body:tt)* } $($rest:tt)*) => {
-        primitive_getter!($ty => $ident { $($body)* });
-        primitive_getters!($($rest)*);
-    };
-}
 
 /// An immutable struct field reference.
 ///
@@ -313,7 +262,7 @@ impl<'a> Field<'a> {
     #[cfg(feature = "alloc")]
     #[inline]
     pub fn as_slice<T: Any>(&self) -> Option<&[T]> {
-        match_downcast_ref!(
+        get_downcast_ref!(
             self.value,
             &[T] => |&v| Some(v),
             Vec<T> => |v| Some(v.as_slice())
@@ -346,7 +295,7 @@ impl<'a> Field<'a> {
     }
 
     #[cfg(feature = "alloc")]
-    primitive_getters! {
+    field_getter! {
         &str => str {
             &str => |&v| Some(v),
             String => |v| Some(v.as_str())
@@ -354,13 +303,13 @@ impl<'a> Field<'a> {
     }
 
     #[cfg(not(feature = "alloc"))]
-    primitive_getters! {
+    field_getter! {
         &str => str {
             &str => |&v| Some(v)
         }
     }
 
-    primitive_getters! {
+    field_getters! {
         u8 {
             u8 => |&v| Some(v),
             u16 | u32 | u64 | u128 => |&v| v.try_into().ok(),
@@ -386,7 +335,7 @@ impl<'a> Field<'a> {
         }
     }
 
-    primitive_getters! {
+    field_getters! {
         i8 {
             i8 => |&v| Some(v),
             i16 | i32 | i64 | i128 => |&v| v.try_into().ok(),
@@ -412,7 +361,7 @@ impl<'a> Field<'a> {
         }
     }
 
-    primitive_getters! {
+    field_getters! {
         f32 {
             f32 => |&v| Some(v),
         }
