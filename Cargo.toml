@@ -33,10 +33,9 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [features]
-default = ["std", "derive"]
+default = ["alloc", "derive"]
 alloc = []
 derive = ["field_access_derive"]
-std = ["alloc"]
 
 [dependencies]
 field_access_derive = { version = "=0.0.1", path = "derive", optional = true }
