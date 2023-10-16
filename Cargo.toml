@@ -4,6 +4,7 @@ members = ["derive"]
 
 [workspace.package]
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/martinohmann/hcl-rs"
 edition = "2021"
 rust-version = "1.65.0"  # MSRV
 include = [
@@ -21,6 +22,7 @@ include = [
 name = "field_access"
 version = "0.0.1"
 description = "Dynamically access struct fields"
+documentation = "https://docs.rs/field_access/"
 categories = ["data-structures"]
 keywords = ["struct", "field", "access", "field-access"]
 license.workspace = true
