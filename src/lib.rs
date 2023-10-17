@@ -315,19 +315,64 @@ impl<'a> Field<'a> {
         self.is::<String>()
     }
 
+    /// Returns `true` if the field value is of type `&str`.
     #[cfg(feature = "alloc")]
-    field_getter! {
-        &str => str {
-            &str => |&v| Some(v),
-            String => |v| Some(v.as_str())
-        }
+    #[inline]
+    pub fn is_str(&self) -> bool {
+        self.is::<&str>()
     }
 
+    /// Obtain an immutable reference to the value as `&str`.
+    ///
+    /// Returns `Some(_)` if field's value deferences to `&str`, `None` otherwise.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::FieldAccess;
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: String
+    /// }
+    ///
+    /// let foo = Foo { a: String::from("bar") };
+    /// let field = foo.field("a").unwrap();
+    ///
+    /// assert_eq!(field.as_str(), Some("bar"));
+    /// ```
+    #[cfg(feature = "alloc")]
+    pub fn as_str(&self) -> Option<&str> {
+        get_downcast_ref!(
+            self.value,
+            &str => |&v| Some(v),
+            String => |v| Some(v.as_str())
+        )
+    }
+
+    /// Obtain an immutable reference to the value as `&str`.
+    ///
+    /// Returns `Some(_)` if field's value is of type `&str`, `None` otherwise.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::FieldAccess;
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: &'static str
+    /// }
+    ///
+    /// let foo = Foo { a: "bar" };
+    /// let field = foo.field("a").unwrap();
+    ///
+    /// assert_eq!(field.as_str(), Some("bar"));
+    /// ```
     #[cfg(not(feature = "alloc"))]
-    field_getter! {
-        &str => str {
-            &str => |&v| Some(v)
-        }
+    #[inline]
+    pub fn as_str(&self) -> Option<&str> {
+        self.get().copied()
     }
 
     field_getter! {
