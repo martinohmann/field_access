@@ -309,6 +309,12 @@ impl<'a> Field<'a> {
         }
     }
 
+    field_getter! {
+        bool {
+            bool => |&v| Some(v)
+        }
+    }
+
     field_getters! {
         u8 {
             u8 => |&v| Some(v),
