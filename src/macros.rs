@@ -22,6 +22,23 @@ macro_rules! field_getter {
         paste! {
             /// Returns `true` if the field value is of type
             #[doc = concat!("`", stringify!($ty), r"`.")]
+            ///
+            /// # Example
+            ///
+            /// ```
+            /// use field_access::FieldAccess;
+            ///
+            /// #[derive(FieldAccess)]
+            /// struct Foo {
+            #[doc = concat!("    a: ", stringify!($ty), ",")]
+            /// }
+            ///
+            #[doc = concat!("let foo = Foo { a: ", stringify!($ty), "::default() };")]
+            /// let field = foo.field("a").unwrap();
+            ///
+            #[doc = concat!("assert!(field.is_", stringify!($ident), "());")]
+            #[doc = concat!("assert!(!field.is::<&", stringify!($ty), ">());")]
+            /// ```
             #[inline]
             pub fn [<is_ $ident>](&self) -> bool {
                 self.is::<$ty>()

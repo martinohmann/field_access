@@ -303,6 +303,23 @@ impl<'a> Field<'a> {
     }
 
     /// Returns `true` if the field value is of type `Vec<T>`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::FieldAccess;
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: Vec<u8>
+    /// }
+    ///
+    /// let foo = Foo { a: vec![1, 2, 3] };
+    /// let field = foo.field("a").unwrap();
+    ///
+    /// assert!(field.is_vec::<u8>());
+    /// assert!(!field.is_vec::<u16>());
+    /// ```
     #[cfg(feature = "alloc")]
     #[inline]
     pub fn is_vec<T: Any>(&self) -> bool {
@@ -310,6 +327,23 @@ impl<'a> Field<'a> {
     }
 
     /// Returns `true` if the field value is of type `String`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::FieldAccess;
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: String,
+    /// }
+    ///
+    /// let foo = Foo { a: String::from("bar") };
+    /// let field = foo.field("a").unwrap();
+    ///
+    /// assert!(field.is_string());
+    /// assert!(!field.is_str());
+    /// ```
     #[cfg(feature = "alloc")]
     #[inline]
     pub fn is_string(&self) -> bool {
@@ -317,6 +351,22 @@ impl<'a> Field<'a> {
     }
 
     /// Returns `true` if the field value is of type `&str`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::FieldAccess;
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: &'static str,
+    /// }
+    ///
+    /// let foo = Foo { a: "bar" };
+    /// let field = foo.field("a").unwrap();
+    ///
+    /// assert!(field.is_str());
+    /// ```
     #[inline]
     pub fn is_str(&self) -> bool {
         self.is::<&str>()
