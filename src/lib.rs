@@ -137,6 +137,7 @@ impl<T> FieldAccess for T where T: AnyFieldAccess {}
 /// A `FieldRef` is a proxy for immutable operations on a struct's field.
 ///
 /// Values of this type are created by [`FieldAccess::field`].
+#[derive(Debug)]
 pub struct Field<'a> {
     value: &'a dyn Any,
 }
@@ -402,6 +403,7 @@ impl<'a> Field<'a> {
 /// A `FieldMut` is a proxy for mutable operations on a struct's field.
 ///
 /// Values of this type are created by [`FieldAccess::field_mut`].
+#[derive(Debug)]
 pub struct FieldMut<'a> {
     value: &'a mut dyn Any,
 }
