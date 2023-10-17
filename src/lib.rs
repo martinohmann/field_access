@@ -317,7 +317,6 @@ impl<'a> Field<'a> {
     }
 
     /// Returns `true` if the field value is of type `&str`.
-    #[cfg(feature = "alloc")]
     #[inline]
     pub fn is_str(&self) -> bool {
         self.is::<&str>()
