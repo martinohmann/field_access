@@ -137,7 +137,7 @@ impl<T> FieldAccess for T where T: AnyFieldAccess {}
 /// A `FieldRef` is a proxy for immutable operations on a struct's field.
 ///
 /// Values of this type are created by [`FieldAccess::field`].
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Field<'a> {
     value: &'a dyn Any,
 }
