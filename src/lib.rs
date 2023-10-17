@@ -16,6 +16,7 @@ use alloc::string::String;
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 use core::any::{Any, TypeId};
+use core::fmt;
 use core::iter::FusedIterator;
 use core::mem;
 use core::ops;
@@ -608,6 +609,12 @@ impl<'a> Fields<'a> {
             access,
             field_names: access.field_names().iter(),
         }
+    }
+}
+
+impl<'a> fmt::Debug for Fields<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.access.field_names()).finish()
     }
 }
 
