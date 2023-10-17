@@ -250,7 +250,8 @@ impl<'a> Field<'a> {
 
     /// Obtain an immutable reference to the value as `&[T]`.
     ///
-    /// Returns `Some(_)` if field's value deferences to `&[T]`, `None` otherwise.
+    /// Returns `Some(_)` if [`.is_slice::<T>()`](Self::is_slice) or
+    /// [`.is_vec::<T>()`][Self::is_vec] would return `true`, `None` otherwise.
     ///
     /// # Example
     ///
@@ -324,7 +325,8 @@ impl<'a> Field<'a> {
 
     /// Obtain an immutable reference to the value as `&str`.
     ///
-    /// Returns `Some(_)` if field's value deferences to `&str`, `None` otherwise.
+    /// Returns `Some(_)` if [`.is_str()`](Self::is_str) or [`.is_string()`][Self::is_string] would
+    /// return `true`, `None` otherwise.
     ///
     /// # Example
     ///
