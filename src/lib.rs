@@ -240,6 +240,12 @@ impl<'a> Field<'a> {
         self.value
     }
 
+    /// Returns `true` if the field value is of type `&[T]`.
+    #[inline]
+    pub fn is_slice<T: Any>(&self) -> bool {
+        self.is::<&[T]>()
+    }
+
     /// Obtain an immutable reference to the value as `&[T]`.
     ///
     /// Returns `Some(_)` if field's value deferences to `&[T]`, `None` otherwise.
@@ -260,7 +266,6 @@ impl<'a> Field<'a> {
     /// assert_eq!(field.as_slice(), Some(&[1u8, 2, 3][..]));
     /// ```
     #[cfg(feature = "alloc")]
-    #[inline]
     pub fn as_slice<T: Any>(&self) -> Option<&[T]> {
         get_downcast_ref!(
             self.value,
@@ -292,6 +297,20 @@ impl<'a> Field<'a> {
     #[inline]
     pub fn as_slice<T: Any>(&self) -> Option<&[T]> {
         self.get().copied()
+    }
+
+    /// Returns `true` if the field value is of type `Vec<T>`.
+    #[cfg(feature = "alloc")]
+    #[inline]
+    pub fn is_vec<T: Any>(&self) -> bool {
+        self.is::<Vec<T>>()
+    }
+
+    /// Returns `true` if the field value is of type `String`.
+    #[cfg(feature = "alloc")]
+    #[inline]
+    pub fn is_string(&self) -> bool {
+        self.is::<String>()
     }
 
     #[cfg(feature = "alloc")]
