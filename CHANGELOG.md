@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.1.1](https://github.com/martinohmann/field_access/compare/field_access-v0.1.0...field_access-v0.1.1) (2023-10-18)
+
+
+### Features
+
+* add `Field::{as,is}_bool` ([25779c4](https://github.com/martinohmann/field_access/commit/25779c48db18705eb11048df8595eb21e6ce80fd))
+* add `Field::is_{slice,string,vec}` ([1a3ec90](https://github.com/martinohmann/field_access/commit/1a3ec9038b12ec87fe7293c1b3a870817d9a2e8a))
+* add examples for `Field::is_*` ([25744dd](https://github.com/martinohmann/field_access/commit/25744dd0f8740d95886f5c95b423005013c9e5e0))
+* derive `Clone` for `Field` ([d3bb23a](https://github.com/martinohmann/field_access/commit/d3bb23a21eb0b4233cf36c5bfc275796189aceed))
+* derive `Debug` for `Field{,Mut}` ([a9a6b33](https://github.com/martinohmann/field_access/commit/a9a6b33b7cfc2a15dbbf97fdf5e267a27fee6414))
+* implement `Debug` for `Fields` ([acd46bb](https://github.com/martinohmann/field_access/commit/acd46bbdab62e97454e8436db26d53287e946e84))
+
+
+### Bug Fixes
+
+* add missing repository link to `Cargo.toml` ([8862bf8](https://github.com/martinohmann/field_access/commit/8862bf8a890179a10605ee2e8aac36294322895e))
+* remove misplaced feature gate ([4c448e3](https://github.com/martinohmann/field_access/commit/4c448e3c82b8663d149c6292dc592f560ee0a1b7))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * field_access_derive bumped from 0.1.0 to 0.1.1
+
 ## [0.1.0](https://github.com/martinohmann/field_access/compare/field_access-v0.0.1...field_access-v0.1.0) (2023-10-16)
 
 
