@@ -20,8 +20,7 @@ macro_rules! field_getter {
     };
     ($ty:ty => $ident:tt { $($rest:tt)+ }) => {
         paste! {
-            /// Returns `true` if the field value is of type
-            #[doc = concat!("`", stringify!($ty), r"`.")]
+            #[doc = "Returns `true` if the field value is of type `" $ty "`."]
             ///
             /// # Example
             ///
@@ -30,32 +29,27 @@ macro_rules! field_getter {
             ///
             /// #[derive(FieldAccess)]
             /// struct Foo {
-            #[doc = concat!("    a: ", stringify!($ty), ",")]
+            #[doc = "    a: " $ty ","]
             /// }
             ///
-            #[doc = concat!("let foo = Foo { a: ", stringify!($ty), "::default() };")]
+            #[doc = "let foo = Foo { a: " $ty "::default() };"]
             /// let field = foo.field("a").unwrap();
             ///
-            #[doc = concat!("assert!(field.is_", stringify!($ident), "());")]
-            #[doc = concat!("assert!(!field.is::<&", stringify!($ty), ">());")]
+            #[doc = "assert!(field.is_" $ident "());"]
+            #[doc = "assert!(!field.is::<&" $ty ">());"]
             /// ```
             #[inline]
             pub fn [<is_ $ident>](&self) -> bool {
                 self.is::<$ty>()
             }
 
-            /// Returns the field value as
-            #[doc = concat!("`", stringify!($ty), "`")]
-            /// .
+            #[doc = "Returns the field value as `" $ty "`."]
             ///
             /// This method is guaranteed to return `Some(_)` if
-            #[doc = concat!("[`.is_", stringify!($ident), "()`][Self::is_", stringify!($ident) ,"]")]
-            /// returns `true`.
+            #[doc = "[`.is_" $ident "()`][Self::is_" $ident "] returns `true`."]
             ///
             /// It may also return `Some(_)` if it is possible to perform a lossless conversion of
-            /// the field's value into
-            #[doc = concat!("`", stringify!($ty), "`")]
-            /// .
+            #[doc = "the field's value into `" $ty "`."]
             pub fn [<as_ $ident>](&self) -> Option<$ty> {
                 get_downcast_ref!(self.value, $($rest)*)
             }
