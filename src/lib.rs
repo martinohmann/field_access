@@ -243,6 +243,22 @@ impl<'a> Field<'a> {
     }
 
     /// Returns `true` if the field value is of type `&[T]`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::FieldAccess;
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: &'static [u8]
+    /// }
+    ///
+    /// let foo = Foo { a: &[1, 2, 3] };
+    /// let field = foo.field("a").unwrap();
+    ///
+    /// assert!(field.is_slice::<u8>());
+    /// ```
     #[inline]
     pub fn is_slice<T: Any>(&self) -> bool {
         self.is::<&[T]>()
