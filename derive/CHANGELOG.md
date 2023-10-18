@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/martinohmann/field_access/compare/field_access_derive-v0.1.0...field_access_derive-v0.1.1) (2023-10-18)
+
+
+### Bug Fixes
+
+* add missing repository link to `Cargo.toml` ([8862bf8](https://github.com/martinohmann/field_access/commit/8862bf8a890179a10605ee2e8aac36294322895e))
+
 ## [0.1.0](https://github.com/martinohmann/field_access/compare/field_access_derive-v0.0.1...field_access_derive-v0.1.0) (2023-10-16)
 
 
