@@ -22,6 +22,22 @@ macro_rules! as_type_method {
                 ///
                 /// It may also return `Some(_)` if it is possible to perform a lossless conversion of
                 #[doc = "the field's value into `" $ty "`."]
+                ///
+                /// # Example
+                ///
+                /// ```
+                /// use field_access::FieldAccess;
+                ///
+                /// #[derive(FieldAccess, Default)]
+                /// struct Foo {
+                #[doc = "    a: " $ty ","]
+                /// }
+                ///
+                /// let mut foo = Foo::default();
+                /// let mut field = foo.field("a").unwrap();
+                ///
+                #[doc = "assert!(field.as_" $ty:lower "().is_some());"]
+                /// ```
                 pub fn [<as_ $ty>](&self) -> Option<$ty> {
                     get_downcast_ref!(self.value, $ty => |&v| Some(v), $($($mapping)*)*)
                 }
