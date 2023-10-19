@@ -442,72 +442,47 @@ impl<'a> Field<'a> {
         self.get().copied()
     }
 
-    field_getter! {
-        bool {
-            bool => |&v| Some(v)
-        }
-    }
+    is_type_method!(bool);
+    is_type_method!(u8, u16, u32, u64, u128);
+    is_type_method!(i8, i16, i32, i64, i128);
+    is_type_method!(f32, f64);
 
-    field_getters! {
-        u8 {
-            u8 => |&v| Some(v),
-            u16 | u32 | u64 | u128 => |&v| v.try_into().ok(),
-        }
+    as_type_method!(bool);
+    as_type_method! {
+        u8 { u16 | u32 | u64 | u128 => |&v| v.try_into().ok() },
         u16 {
-            u16 => |&v| Some(v),
             u8 => |&v| Some(v.into()),
             u32 | u64 | u128 => |&v| v.try_into().ok(),
-        }
+        },
         u32 {
-            u32 => |&v| Some(v),
             u16 | u8 => |&v| Some(v.into()),
             u64 | u128 => |&v| v.try_into().ok(),
-        }
+        },
         u64 {
-            u64 => |&v| Some(v),
             u32 | u16 | u8 => |&v| Some(v.into()),
             u128 => |&v| v.try_into().ok(),
-        }
-        u128 {
-            u128 => |&v| Some(v),
-            u8 | u16 | u32 | u64 => |&v| Some(v.into()),
-        }
+        },
+        u128 { u8 | u16 | u32 | u64 => |&v| Some(v.into()) }
     }
-
-    field_getters! {
-        i8 {
-            i8 => |&v| Some(v),
-            i16 | i32 | i64 | i128 => |&v| v.try_into().ok(),
-        }
+    as_type_method! {
+        i8 { i16 | i32 | i64 | i128 => |&v| v.try_into().ok() },
         i16 {
-            i16 => |&v| Some(v),
             i8 => |&v| Some(v.into()),
             i32 | i64 | i128 => |&v| v.try_into().ok(),
-        }
+        },
         i32 {
-            i32 => |&v| Some(v),
             i16 | i8 => |&v| Some(v.into()),
             i64 | i128 => |&v| v.try_into().ok(),
-        }
+        },
         i64 {
-            i64 => |&v| Some(v),
             i32 | i16 | i8 => |&v| Some(v.into()),
             i128 => |&v| v.try_into().ok(),
-        }
-        i128 {
-            i128 => |&v| Some(v),
-            i8 | i16 | i32 | i64 => |&v| Some(v.into()),
-        }
+        },
+        i128 { i8 | i16 | i32 | i64 => |&v| Some(v.into()) }
     }
-
-    field_getters! {
-        f32 {
-            f32 => |&v| Some(v),
-        }
-        f64 {
-            f64 => |&v| Some(v),
-            f32 => |&v| Some(v.into()),
-        }
+    as_type_method! {
+        f32,
+        f64 { f32 => |&v| Some(v.into()) }
     }
 }
 
