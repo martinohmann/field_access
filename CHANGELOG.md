@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.1.2](https://github.com/martinohmann/field_access/compare/field_access-v0.1.1...field_access-v0.1.2) (2023-10-19)
+
+
+### Features
+
+* add `as_*_mut` methods to `FieldMut` ([5e85611](https://github.com/martinohmann/field_access/commit/5e856118f1cd8f54e9c7e79e8c5555ec014b9cbd))
+* add methods for `usize` and `isize` ([21a74d0](https://github.com/martinohmann/field_access/commit/21a74d0efbd1578d4749f7ceb34ea15b9742d88a))
+
+
+### Bug Fixes
+
+* add categories and keywords to `Cargo.toml` ([40a9278](https://github.com/martinohmann/field_access/commit/40a9278c280d8adf1a91f9d6d2736fc4ca2a23b2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * field_access_derive bumped from 0.1.1 to 0.1.2
+
 ## [0.1.1](https://github.com/martinohmann/field_access/compare/field_access-v0.1.0...field_access-v0.1.1) (2023-10-18)
 
 

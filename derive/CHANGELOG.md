@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/martinohmann/field_access/compare/field_access_derive-v0.1.1...field_access_derive-v0.1.2) (2023-10-19)
+
+
+### Bug Fixes
+
+* add categories and keywords to `Cargo.toml` ([40a9278](https://github.com/martinohmann/field_access/commit/40a9278c280d8adf1a91f9d6d2736fc4ca2a23b2))
+
 ## [0.1.1](https://github.com/martinohmann/field_access/compare/field_access_derive-v0.1.0...field_access_derive-v0.1.1) (2023-10-18)
 
 
