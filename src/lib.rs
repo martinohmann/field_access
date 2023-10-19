@@ -443,8 +443,8 @@ impl<'a> Field<'a> {
     }
 
     is_type_method!(bool);
-    is_type_method!(u8, u16, u32, u64, u128);
-    is_type_method!(i8, i16, i32, i64, i128);
+    is_type_method!(u8, u16, u32, u64, u128, usize);
+    is_type_method!(i8, i16, i32, i64, i128, isize);
     is_type_method!(f32, f64);
 
     as_type_method!(bool);
@@ -462,7 +462,11 @@ impl<'a> Field<'a> {
             u32 | u16 | u8 => |&v| Some(v.into()),
             u128 => |&v| v.try_into().ok(),
         },
-        u128 { u8 | u16 | u32 | u64 => |&v| Some(v.into()) }
+        u128 { u8 | u16 | u32 | u64 => |&v| Some(v.into()) },
+        usize {
+            u16 | u8 => |&v| Some(v.into()),
+            u32 | u64 | u128 => |&v| v.try_into().ok(),
+        },
     }
     as_type_method! {
         i8 { i16 | i32 | i64 | i128 => |&v| v.try_into().ok() },
@@ -478,7 +482,11 @@ impl<'a> Field<'a> {
             i32 | i16 | i8 => |&v| Some(v.into()),
             i128 => |&v| v.try_into().ok(),
         },
-        i128 { i8 | i16 | i32 | i64 => |&v| Some(v.into()) }
+        i128 { i8 | i16 | i32 | i64 => |&v| Some(v.into()) },
+        isize {
+            i16 | i8 => |&v| Some(v.into()),
+            i32 | i64 | i128 => |&v| v.try_into().ok(),
+        },
     }
     as_type_method! {
         f32,
@@ -697,8 +705,8 @@ impl<'a> FieldMut<'a> {
     as_type_mut_method!(String { String::from("bar") });
 
     as_type_mut_method!(bool { true });
-    as_type_mut_method!(u8, u16, u32, u64, u128);
-    as_type_mut_method!(i8, i16, i32, i64, i128);
+    as_type_mut_method!(u8, u16, u32, u64, u128, usize);
+    as_type_mut_method!(i8, i16, i32, i64, i128, isize);
     as_type_mut_method!(f32, f64);
 }
 
