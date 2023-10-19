@@ -1,14 +1,11 @@
 macro_rules! get_downcast_ref {
     ($value:expr, $($($ty:ty)|+ => $map:expr),+ $(,)?) => {
-        if false {
-            unreachable!();
-        }
         $($(
-        else if let Some(value) = $value.downcast_ref::<$ty>().and_then($map) {
+        if let Some(value) = $value.downcast_ref::<$ty>().and_then($map) {
             Some(value)
-        }
+        } else
         )+)+
-        else {
+        {
             None
         }
     };
