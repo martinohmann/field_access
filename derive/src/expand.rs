@@ -1,11 +1,26 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{punctuated::Punctuated, Data, DeriveInput, Error, Field, Result, Token};
+use syn::{punctuated::Punctuated, Data, DeriveInput, Error, Field, Result, Token, Visibility};
 
 pub fn derive(input: &DeriveInput) -> Result<TokenStream> {
     let name = &input.ident;
 
-    let fields: Vec<_> = fields(input)?
+    let attrs = attrs(input)?;
+    let fields = fields(input)?;
+
+    let mut filtered_fields: Vec<&Field> = Vec::with_capacity(fields.len());
+
+    for field in fields.iter() {
+        let field_attrs = field_attrs(field)?;
+
+        if field_attrs.skip || attrs.skip_field(field) {
+            continue;
+        }
+
+        filtered_fields.push(field);
+    }
+
+    let fields: Vec<_> = filtered_fields
         .iter()
         .map(|field| {
             let name = field.ident.as_ref().expect("field has a name");
@@ -72,4 +87,58 @@ fn fields(input: &DeriveInput) -> Result<&Fields> {
         input,
         format!("FieldAccess does not support {unsupported}"),
     ))
+}
+
+struct Attrs {
+    public_only: bool,
+}
+
+impl Attrs {
+    fn skip_field(&self, field: &Field) -> bool {
+        self.public_only && !matches!(field.vis, Visibility::Public(_))
+    }
+}
+
+fn attrs(input: &DeriveInput) -> Result<Attrs> {
+    let mut public_only = false;
+
+    for attr in &input.attrs {
+        if attr.path().is_ident("field_access") {
+            attr.parse_nested_meta(|meta| {
+                // #[field_access(public)]
+                if meta.path.is_ident("public") {
+                    public_only = true;
+                    return Ok(());
+                }
+
+                Err(meta.error("unrecognized `field_access`"))
+            })?;
+        }
+    }
+
+    Ok(Attrs { public_only })
+}
+
+struct FieldAttrs {
+    skip: bool,
+}
+
+fn field_attrs(field: &Field) -> Result<FieldAttrs> {
+    let mut skip = false;
+
+    for attr in &field.attrs {
+        if attr.path().is_ident("field_access") {
+            attr.parse_nested_meta(|meta| {
+                // #[field_access(skip)]
+                if meta.path.is_ident("skip") {
+                    skip = true;
+                    return Ok(());
+                }
+
+                Err(meta.error("unrecognized `field_access`"))
+            })?;
+        }
+    }
+
+    Ok(FieldAttrs { skip })
 }

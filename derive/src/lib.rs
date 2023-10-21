@@ -13,7 +13,7 @@ mod expand;
 use proc_macro::TokenStream;
 use syn::{parse_macro_input, DeriveInput};
 
-#[proc_macro_derive(FieldAccess)]
+#[proc_macro_derive(FieldAccess, attributes(field_access))]
 pub fn derive_field_access(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     expand::derive(&input)
