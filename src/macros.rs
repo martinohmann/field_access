@@ -47,7 +47,7 @@ macro_rules! as_type_method {
 }
 
 macro_rules! as_type_mut_method {
-    ($ty:ty { $example_value:expr }) => {
+    ($ty:ty { example_value: $example_value:expr }) => {
         paste! {
             #[doc = "Returns a mutable reference to the field value as `&mut " $ty "`."]
             ///
@@ -79,14 +79,14 @@ macro_rules! as_type_mut_method {
         }
     };
     ($ty:ty) => {
-        as_type_mut_method!($ty { <$ty>::MAX });
+        as_type_mut_method!($ty { example_value: <$ty>::MAX });
     };
     ($ty:ty, $($rest:tt)+) => {
         as_type_mut_method!($ty);
         as_type_mut_method!($($rest)+);
     };
-    ($ty:ty { $example_value:expr }, $($rest:tt)+) => {
-        as_type_mut_method!($ty { $example_value });
+    ($ty:ty { example_value: $example_value:expr }, $($rest:tt)+) => {
+        as_type_mut_method!($ty { example_value: $example_value });
         as_type_mut_method!($($rest)+);
     };
 }

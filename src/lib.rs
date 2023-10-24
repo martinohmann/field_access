@@ -768,9 +768,13 @@ impl<'a> FieldMut<'a> {
     }
 
     #[cfg(feature = "alloc")]
-    as_type_mut_method!(String { String::from("bar") });
+    as_type_mut_method!(String {
+        example_value: String::from("bar")
+    });
 
-    as_type_mut_method!(bool { true });
+    as_type_mut_method!(bool {
+        example_value: true
+    });
     as_type_mut_method!(u8, u16, u32, u64, u128, usize);
     as_type_mut_method!(i8, i16, i32, i64, i128, isize);
     as_type_mut_method!(f32, f64);
