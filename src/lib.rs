@@ -29,19 +29,79 @@ pub use field_access_derive::FieldAccess;
 
 /// Low-level struct field access.
 ///
-/// This trait can be implemented to provide access to the methods of the [`FieldAccess`] trait
-/// which has a blanket implementation for any type implementing `AnyFieldAccess`.
+/// In most cases it is more convenient to use the methods of the [`FieldAccess`] trait which has a
+/// blanket implementation for any type implementing `AnyFieldAccess`.
 ///
 /// Consider automatically implementing it via `#[derive(FieldAccess)]` for structs where you need
 /// dynamic field access.
 pub trait AnyFieldAccess: Any {
     /// Provides an immutable reference to a struct field.
+    ///
+    /// Returns `Some(_)` if the field is accessible, otherwise `None`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::{AnyFieldAccess, FieldAccess};
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let foo = Foo { a: 1 };
+    /// let field = foo.field_as_any("a");
+    ///
+    /// assert!(field.is_some());
+    /// assert_eq!(field.unwrap().downcast_ref::<u8>(), Some(&1));
+    /// ```
     fn field_as_any(&self, field: &str) -> Option<&dyn Any>;
 
     /// Provides a mutable reference to a struct field.
+    ///
+    /// Returns `Some(_)` if the field is accessible, otherwise `None`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::{AnyFieldAccess, FieldAccess};
+    ///
+    /// #[derive(FieldAccess)]
+    /// struct Foo {
+    ///     a: u8
+    /// }
+    ///
+    /// let mut foo = Foo { a: 1 };
+    ///
+    /// if let Some(field) = foo.field_as_any_mut("a") {
+    ///     if let Some(value) = field.downcast_mut::<u8>() {
+    ///         *value = 2;
+    ///     }
+    /// }
+    ///
+    /// assert_eq!(foo.a, 2);
+    /// ```
     fn field_as_any_mut(&mut self, field: &str) -> Option<&mut dyn Any>;
 
     /// Provides the names of all accessible fields.
+    ///
+    /// The field name order is undefined and should not be relied upon.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use field_access::{AnyFieldAccess, FieldAccess};
+    ///
+    /// #[derive(FieldAccess, Default)]
+    /// struct Foo {
+    ///     a: u8,
+    ///     b: bool,
+    /// }
+    ///
+    /// let foo = Foo::default();
+    ///
+    /// assert_eq!(foo.field_names(), &["a", "b"]);
+    /// ```
     fn field_names(&self) -> &'static [&'static str];
 }
 
@@ -84,6 +144,8 @@ pub trait FieldAccess: AnyFieldAccess {
     /// The returned [`FieldMut`] provides methods to mutably interact with the field. See its
     /// documentation for more.
     ///
+    /// # Example
+    ///
     /// ```
     /// use field_access::FieldAccess;
     ///
@@ -103,6 +165,10 @@ pub trait FieldAccess: AnyFieldAccess {
     }
 
     /// Returns an iterator over all struct fields.
+    ///
+    /// The order of the items yielded by the iterator is undefined and should not be relied upon.
+    ///
+    /// # Example
     ///
     /// ```
     /// use field_access::FieldAccess;
