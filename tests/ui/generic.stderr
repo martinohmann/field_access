@@ -1,0 +1,33 @@
+error[E0310]: the parameter type `T` may not live long enough
+ --> tests/ui/generic.rs:3:10
+  |
+3 | #[derive(FieldAccess)]
+  |          ^^^^^^^^^^^ ...so that the type `Foo<T>` will meet its required lifetime bounds...
+  |
+note: ...that is required by this bound
+ --> src/lib.rs
+  |
+  | pub trait AnyFieldAccess: Any {
+  |                           ^^^
+  = note: this error originates in the derive macro `FieldAccess` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider adding an explicit lifetime bound...
+  |
+4 | pub struct Foo<T: 'static> {
+  |                 +++++++++
+
+error[E0310]: the parameter type `T` may not live long enough
+ --> tests/ui/generic.rs:3:10
+  |
+3 | #[derive(FieldAccess)]
+  |          ^^^^^^^^^^^ ...so that the type `T` will meet its required lifetime bounds...
+  |
+note: ...that is required by this bound
+ --> src/lib.rs
+  |
+  | pub trait AnyFieldAccess: Any {
+  |                           ^^^
+  = note: this error originates in the derive macro `FieldAccess` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider adding an explicit lifetime bound...
+  |
+4 | pub struct Foo<T: 'static> {
+  |                 +++++++++
