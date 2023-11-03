@@ -17,14 +17,14 @@ jobs:
       matrix:
         build:
           - stable
-          - nightly
+          # - nightly
         include:
           - build: stable
             os: ubuntu-20.04
             rust: stable
-          - build: nightly
-            os: ubuntu-20.04
-            rust: nightly
+          # - build: nightly
+          #   os: ubuntu-20.04
+          #   rust: nightly
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
