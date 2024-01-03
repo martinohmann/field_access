@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.3](https://github.com/martinohmann/field_access/compare/field_access-v0.1.2...field_access-v0.1.3) - 2024-01-03
+
+### Other
+- *(release)* switch to release-plz
+- *(deps)* bump trybuild from 1.0.85 to 1.0.87 ([#15](https://github.com/martinohmann/field_access/pull/15))
+- remove release-please command
+- update trybuild expectation to new compiler output
+- *(deps)* bump google-github-actions/release-please-action ([#8](https://github.com/martinohmann/field_access/pull/8))
+- *(deps)* bump proc-macro2 from 1.0.69 to 1.0.70 ([#6](https://github.com/martinohmann/field_access/pull/6))
+- *(deps)* bump syn from 2.0.38 to 2.0.39 ([#7](https://github.com/martinohmann/field_access/pull/7))
+- disable running tests on nightly for now
+- label example value in `as_type_mut_method!` macro
+- add doc test examples for `AnyFieldAccess` methods
+- add ui tests for type with non-static generics
+- ensure `derive` feature is enabled in tests
+
 ## [0.1.2](https://github.com/martinohmann/field_access/compare/field_access-v0.1.1...field_access-v0.1.2) (2023-10-19)
 
 
