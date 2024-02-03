@@ -21,4 +21,4 @@ rustdoc-args = ["--cfg", "docsrs"]
 [dependencies]
 proc-macro2 = "1.0.78"
 quote = "1.0.29"
-syn = "2.0.39"
+syn = "2.0.48"
