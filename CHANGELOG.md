@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.6](https://github.com/martinohmann/field_access/compare/field_access-v0.1.5...field_access-v0.1.6) - 2024-04-02
+
+### Other
+- *(deps)* bump syn from 2.0.52 to 2.0.57 ([#26](https://github.com/martinohmann/field_access/pull/26))
+- *(deps)* bump proc-macro2 from 1.0.78 to 1.0.79 ([#25](https://github.com/martinohmann/field_access/pull/25))
+- *(deps)* bump trybuild from 1.0.89 to 1.0.91 ([#27](https://github.com/martinohmann/field_access/pull/27))
+- *(deps)* bump actions/cache from 4.0.1 to 4.0.2 ([#28](https://github.com/martinohmann/field_access/pull/28))
+- `Cargo.toml` link to correct repository ([#29](https://github.com/martinohmann/field_access/pull/29))
+
 ## [0.1.5](https://github.com/martinohmann/field_access/compare/field_access-v0.1.4...field_access-v0.1.5) - 2024-03-01
 
 ### Other
