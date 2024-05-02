@@ -1,6 +1,6 @@
 [package]
 name = "field_access_derive"
-version = "0.1.6"
+version = "0.1.7"
 description = "Derive macro for the field_access crate"
 documentation = "https://docs.rs/field_access_derive/"
 categories = ["data-structures"]
