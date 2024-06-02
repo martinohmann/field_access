@@ -515,40 +515,46 @@ impl<'a> Field<'a> {
 
     as_type_method!(bool);
     as_type_method! {
-        u8 { u16 | u32 | u64 | u128 => |&v| v.try_into().ok() },
+        u8 { u16 | u32 | u64 | u128 | usize => |&v| v.try_into().ok() },
         u16 {
             u8 => |&v| Some(v.into()),
-            u32 | u64 | u128 => |&v| v.try_into().ok(),
+            u32 | u64 | u128 | usize => |&v| v.try_into().ok(),
         },
         u32 {
             u16 | u8 => |&v| Some(v.into()),
-            u64 | u128 => |&v| v.try_into().ok(),
+            u64 | u128 | usize => |&v| v.try_into().ok(),
         },
         u64 {
             u32 | u16 | u8 => |&v| Some(v.into()),
-            u128 => |&v| v.try_into().ok(),
+            u128 | usize => |&v| v.try_into().ok(),
         },
-        u128 { u8 | u16 | u32 | u64 => |&v| Some(v.into()) },
+        u128 {
+            u8 | u16 | u32 | u64 => |&v| Some(v.into()),
+            usize => |&v| v.try_into().ok(),
+        },
         usize {
             u16 | u8 => |&v| Some(v.into()),
             u32 | u64 | u128 => |&v| v.try_into().ok(),
         },
     }
     as_type_method! {
-        i8 { i16 | i32 | i64 | i128 => |&v| v.try_into().ok() },
+        i8 { i16 | i32 | i64 | i128 | isize => |&v| v.try_into().ok() },
         i16 {
             i8 => |&v| Some(v.into()),
-            i32 | i64 | i128 => |&v| v.try_into().ok(),
+            i32 | i64 | i128 | isize => |&v| v.try_into().ok(),
         },
         i32 {
             i16 | i8 => |&v| Some(v.into()),
-            i64 | i128 => |&v| v.try_into().ok(),
+            i64 | i128 | isize => |&v| v.try_into().ok(),
         },
         i64 {
             i32 | i16 | i8 => |&v| Some(v.into()),
-            i128 => |&v| v.try_into().ok(),
+            i128 | isize => |&v| v.try_into().ok(),
         },
-        i128 { i8 | i16 | i32 | i64 => |&v| Some(v.into()) },
+        i128 {
+            i8 | i16 | i32 | i64 => |&v| Some(v.into()),
+            isize => |&v| v.try_into().ok(),
+        },
         isize {
             i16 | i8 => |&v| Some(v.into()),
             i32 | i64 | i128 => |&v| v.try_into().ok(),
