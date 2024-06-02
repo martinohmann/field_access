@@ -47,4 +47,4 @@ paste = "1.0.14"
 [dev-dependencies]
 # Ensures that the `derive` feature is always enabled in integration and doc tests.
 field_access = { path = ".", default-features = false, features = ["derive"] }
-trybuild = { version = "1.0.91", features = ["diff"] }
+trybuild = { version = "1.0.96", features = ["diff"] }
