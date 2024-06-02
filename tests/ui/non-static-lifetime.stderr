@@ -11,3 +11,13 @@ note: lifetime parameter instantiated with the lifetime `'a` as defined here
   |                ^^
   = note: but lifetime parameter must outlive the static lifetime
   = note: this error originates in the derive macro `FieldAccess` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: lifetime may not live long enough
+ --> tests/ui/non-static-lifetime.rs:3:10
+  |
+3 | #[derive(FieldAccess)]
+  |          ^^^^^^^^^^^ cast requires that `'a` must outlive `'static`
+4 | pub struct Foo<'a> {
+  |                -- lifetime `'a` defined here
+  |
+  = note: this error originates in the derive macro `FieldAccess` (in Nightly builds, run with -Z macro-backtrace for more info)
