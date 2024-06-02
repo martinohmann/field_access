@@ -20,7 +20,7 @@ include = [
 
 [package]
 name = "field_access"
-version = "0.1.7"
+version = "0.1.8"
 description = "Dynamically access struct fields"
 documentation = "https://docs.rs/field_access/"
 categories = ["data-structures"]
@@ -41,7 +41,7 @@ alloc = []
 derive = ["field_access_derive"]
 
 [dependencies]
-field_access_derive = { version = "0.1.7", path = "derive", optional = true }
+field_access_derive = { version = "0.1.8", path = "derive", optional = true }
 paste = "1.0.15"
 
 [dev-dependencies]

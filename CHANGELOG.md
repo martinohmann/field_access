@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.8](https://github.com/martinohmann/field_access/compare/field_access-v0.1.7...field_access-v0.1.8) - 2024-06-02
+
+### Fixed
+- add missing `usize` and `isize` conversions ([#42](https://github.com/martinohmann/field_access/pull/42))
+
+### Other
+- *(deps)* bump paste from 1.0.14 to 1.0.15 ([#37](https://github.com/martinohmann/field_access/pull/37))
+- *(deps)* bump syn from 2.0.58 to 2.0.66 ([#41](https://github.com/martinohmann/field_access/pull/41))
+- *(deps)* bump proc-macro2 from 1.0.81 to 1.0.85 ([#39](https://github.com/martinohmann/field_access/pull/39))
+- *(deps)* bump trybuild from 1.0.91 to 1.0.96 ([#38](https://github.com/martinohmann/field_access/pull/38))
+
 ## [0.1.7](https://github.com/martinohmann/field_access/compare/field_access-v0.1.6...field_access-v0.1.7) - 2024-05-02
 
 ### Other
