@@ -42,7 +42,7 @@ derive = ["field_access_derive"]
 
 [dependencies]
 field_access_derive = { version = "0.1.7", path = "derive", optional = true }
-paste = "1.0.14"
+paste = "1.0.15"
 
 [dev-dependencies]
 # Ensures that the `derive` feature is always enabled in integration and doc tests.
