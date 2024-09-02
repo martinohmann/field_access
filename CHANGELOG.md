@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.9](https://github.com/martinohmann/field_access/compare/field_access-v0.1.8...field_access-v0.1.9) - 2024-09-02
+
+### Other
+- *(deps)* bump quote from 1.0.36 to 1.0.37 ([#47](https://github.com/martinohmann/field_access/pull/47))
+- *(deps)* bump proc-macro2 from 1.0.85 to 1.0.86 ([#44](https://github.com/martinohmann/field_access/pull/44))
+- *(deps)* bump syn from 2.0.66 to 2.0.77 ([#48](https://github.com/martinohmann/field_access/pull/48))
+- *(deps)* bump trybuild from 1.0.96 to 1.0.99 ([#46](https://github.com/martinohmann/field_access/pull/46))
+
 ## [0.1.8](https://github.com/martinohmann/field_access/compare/field_access-v0.1.7...field_access-v0.1.8) - 2024-06-02
 
 ### Fixed
