@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.10](https://github.com/martinohmann/field_access/compare/field_access_derive-v0.1.9...field_access_derive-v0.1.10) - 2024-10-04
+
+### Other
+
+- *(deps)* bump syn from 2.0.77 to 2.0.79 ([#51](https://github.com/martinohmann/field_access/pull/51))
+
 ## [0.1.9](https://github.com/martinohmann/field_access/compare/field_access_derive-v0.1.8...field_access_derive-v0.1.9) - 2024-09-02
 
 ### Other
