@@ -12,6 +12,31 @@ note: lifetime parameter instantiated with the lifetime `'a` as defined here
   = note: but lifetime parameter must outlive the static lifetime
   = note: this error originates in the derive macro `FieldAccess` (in Nightly builds, run with -Z macro-backtrace for more info)
 
+error[E0495]: cannot infer an appropriate lifetime for lifetime parameter `'a` due to conflicting requirements
+ --> tests/ui/non-static-lifetime.rs:4:12
+  |
+4 | pub struct Foo<'a> {
+  |            ^^^^^^^
+  |
+note: first, the lifetime cannot outlive the lifetime `'a` as defined here...
+ --> tests/ui/non-static-lifetime.rs:4:16
+  |
+4 | pub struct Foo<'a> {
+  |                ^^
+note: ...so that the types are compatible
+ --> tests/ui/non-static-lifetime.rs:4:12
+  |
+4 | pub struct Foo<'a> {
+  |            ^^^^^^^
+  = note: expected `<Foo<'a> as AnyFieldAccess>`
+             found `<Foo<'_> as AnyFieldAccess>`
+  = note: but, the lifetime must be valid for the static lifetime...
+note: ...so that the declared lifetime parameter bounds are satisfied
+ --> tests/ui/non-static-lifetime.rs:4:12
+  |
+4 | pub struct Foo<'a> {
+  |            ^^^^^^^
+
 error: lifetime may not live long enough
  --> tests/ui/non-static-lifetime.rs:3:10
   |
