@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.11](https://github.com/martinohmann/field_access/compare/field_access-v0.1.10...field_access-v0.1.11) - 2024-11-04
+
+### Other
+
+- *(deps)* bump trybuild from 1.0.99 to 1.0.101 ([#54](https://github.com/martinohmann/field_access/pull/54))
+
 ## [0.1.10](https://github.com/martinohmann/field_access/compare/field_access-v0.1.9...field_access-v0.1.10) - 2024-10-04
 
 ### Other

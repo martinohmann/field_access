@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.11](https://github.com/martinohmann/field_access/compare/field_access_derive-v0.1.10...field_access_derive-v0.1.11) - 2024-11-04
+
+### Other
+
+- *(deps)* bump proc-macro2 from 1.0.86 to 1.0.89 ([#56](https://github.com/martinohmann/field_access/pull/56))
+- *(deps)* bump syn from 2.0.79 to 2.0.87 ([#57](https://github.com/martinohmann/field_access/pull/57))
+
 ## [0.1.10](https://github.com/martinohmann/field_access/compare/field_access_derive-v0.1.9...field_access_derive-v0.1.10) - 2024-10-04
 
 ### Other
