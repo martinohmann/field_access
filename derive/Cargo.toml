@@ -19,6 +19,6 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
-proc-macro2 = "1.0.89"
+proc-macro2 = "1.0.93"
 quote = "1.0.37"
 syn = "2.0.87"
