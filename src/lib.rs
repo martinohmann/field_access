@@ -2,7 +2,7 @@
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(missing_docs)]
 #![warn(clippy::pedantic)]
-#![allow(clippy::must_use_candidate)]
+#![allow(clippy::doc_markdown, clippy::must_use_candidate)]
 #![no_std]
 
 #[cfg(feature = "alloc")]
@@ -19,7 +19,6 @@ use core::any::{Any, TypeId};
 use core::fmt;
 use core::iter::FusedIterator;
 use core::mem;
-use core::ops;
 use core::slice;
 use paste::paste;
 
@@ -114,8 +113,8 @@ pub trait FieldAccess: AnyFieldAccess {
     ///
     /// Returns `Some(_)` if the field is accessible, otherwise `None`.
     ///
-    /// The returned [`Field`] provides methods to immutably interact with the field. See its
-    /// documentation for more.
+    /// The returned [`Field`] reference provides methods to immutably interact with the
+    /// field. See its documentation for more.
     ///
     /// # Example
     ///
@@ -133,16 +132,16 @@ pub trait FieldAccess: AnyFieldAccess {
     /// assert!(foo.field("b").is_none());
     /// ```
     #[inline]
-    fn field(&self, field: &str) -> Option<Field<'_>> {
-        self.field_as_any(field).map(Field::new)
+    fn field(&self, field: &str) -> Option<&Field> {
+        self.field_as_any(field).map(Field::from_ref)
     }
 
     /// Mutable field access.
     ///
     /// Returns `Some(_)` if the field is accessible, otherwise `None`.
     ///
-    /// The returned [`FieldMut`] provides methods to mutably interact with the field. See its
-    /// documentation for more.
+    /// The returned mutable [`Field`] reference provides methods to mutably interact with the
+    /// field. See its documentation for more.
     ///
     /// # Example
     ///
@@ -160,8 +159,8 @@ pub trait FieldAccess: AnyFieldAccess {
     /// assert!(foo.field_mut("b").is_none());
     /// ```
     #[inline]
-    fn field_mut(&mut self, field: &str) -> Option<FieldMut<'_>> {
-        self.field_as_any_mut(field).map(FieldMut::new)
+    fn field_mut(&mut self, field: &str) -> Option<&mut Field> {
+        self.field_as_any_mut(field).map(Field::from_mut)
     }
 
     /// Returns an iterator over all struct fields.
@@ -199,21 +198,29 @@ pub trait FieldAccess: AnyFieldAccess {
 
 impl<T> FieldAccess for T where T: AnyFieldAccess {}
 
-/// An immutable struct field reference.
+/// A struct field reference.
 ///
-/// A `FieldRef` is a proxy for immutable operations on a struct's field.
-///
-/// Values of this type are created by [`FieldAccess::field`].
-#[derive(Debug, Clone)]
-pub struct Field<'a> {
-    value: &'a dyn Any,
+/// References of this type are created by [`FieldAccess::field`] and [`FieldAccess::field_mut`].
+#[derive(Debug)]
+#[repr(transparent)]
+pub struct Field {
+    value: dyn Any,
 }
 
-impl<'a> Field<'a> {
-    fn new(value: &'a dyn Any) -> Self {
-        Field { value }
+impl Field {
+    fn from_ref(value: &dyn Any) -> &Self {
+        // SAFETY: `&Field` is a transparent wrapper around `&dyn Any`.
+        unsafe { &*(value as *const dyn Any as *const Self) }
     }
 
+    fn from_mut(value: &mut dyn Any) -> &mut Self {
+        // SAFETY: `&mut Field` is a transparent wrapper around `&mut dyn Any`.
+        unsafe { &mut *(value as *mut dyn Any as *mut Self) }
+    }
+}
+
+// Immutable access.
+impl Field {
     /// Returns `true` if the field is of type `T`.
     ///
     /// # Example
@@ -305,7 +312,7 @@ impl<'a> Field<'a> {
     /// ```
     #[inline]
     pub fn as_any(&self) -> &dyn Any {
-        self.value
+        &self.value
     }
 
     /// Returns `true` if the field value is of type `&[T]`.
@@ -566,21 +573,8 @@ impl<'a> Field<'a> {
     }
 }
 
-/// A mutable struct field reference.
-///
-/// A `FieldMut` is a proxy for mutable operations on a struct's field.
-///
-/// Values of this type are created by [`FieldAccess::field_mut`].
-#[derive(Debug)]
-pub struct FieldMut<'a> {
-    value: &'a mut dyn Any,
-}
-
-impl<'a> FieldMut<'a> {
-    fn new(value: &'a mut dyn Any) -> Self {
-        FieldMut { value }
-    }
-
+// Mutable access.
+impl Field {
     /// Obtains a mutable reference to the value of type `T`.
     ///
     /// Returns `Some(_)` if field's value is of type `T`, `None` otherwise.
@@ -635,7 +629,7 @@ impl<'a> FieldMut<'a> {
     /// ```
     #[inline]
     pub fn as_any_mut(&mut self) -> &mut dyn Any {
-        self.value
+        &mut self.value
     }
 
     /// Sets the value of the field.
@@ -786,22 +780,6 @@ impl<'a> FieldMut<'a> {
     as_type_mut_method!(f32, f64);
 }
 
-impl<'a> AsRef<Field<'a>> for FieldMut<'a> {
-    fn as_ref(&self) -> &Field<'a> {
-        // SAFETY: `FieldMut` and `Field` share the same memory layout and we're holding an
-        // immutable reference.
-        unsafe { &*(self as *const FieldMut).cast::<Field>() }
-    }
-}
-
-impl<'a> ops::Deref for FieldMut<'a> {
-    type Target = Field<'a>;
-
-    fn deref(&self) -> &Self::Target {
-        self.as_ref()
-    }
-}
-
 /// An immutable iterator over all fields of a struct.
 ///
 /// Values of this type are created by [`FieldAccess::fields`].
@@ -820,14 +798,14 @@ impl<'a> Fields<'a> {
     }
 }
 
-impl<'a> fmt::Debug for Fields<'a> {
+impl fmt::Debug for Fields<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.access.field_names()).finish()
     }
 }
 
 impl<'a> Iterator for Fields<'a> {
-    type Item = (&'static str, Field<'a>);
+    type Item = (&'static str, &'a Field);
 
     fn next(&mut self) -> Option<Self::Item> {
         self.field_names
@@ -840,7 +818,7 @@ impl<'a> Iterator for Fields<'a> {
     }
 }
 
-impl<'a> DoubleEndedIterator for Fields<'a> {
+impl DoubleEndedIterator for Fields<'_> {
     fn next_back(&mut self) -> Option<Self::Item> {
         self.field_names
             .next_back()
@@ -848,5 +826,5 @@ impl<'a> DoubleEndedIterator for Fields<'a> {
     }
 }
 
-impl<'a> ExactSizeIterator for Fields<'a> {}
-impl<'a> FusedIterator for Fields<'a> {}
+impl ExactSizeIterator for Fields<'_> {}
+impl FusedIterator for Fields<'_> {}
