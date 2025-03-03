@@ -6,6 +6,7 @@
     ":semanticCommitTypeAll(chore)",
     "github>martinohmann/.github//renovate/default.json5"
   ],
+  "schedule": ["on the first day of the month"],
   "packageRules": [
     {
       "matchUpdateTypes": ["major"],
