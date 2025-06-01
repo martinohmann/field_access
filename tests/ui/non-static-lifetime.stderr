@@ -12,7 +12,7 @@ note: lifetime parameter instantiated with the lifetime `'a` as defined here
   = note: but lifetime parameter must outlive the static lifetime
   = note: this error originates in the derive macro `FieldAccess` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0495]: cannot infer an appropriate lifetime for lifetime parameter `'a` due to conflicting requirements
+error[E0803]: cannot infer an appropriate lifetime for lifetime parameter `'a` due to conflicting requirements
  --> tests/ui/non-static-lifetime.rs:4:12
   |
 4 | pub struct Foo<'a> {
