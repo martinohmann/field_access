@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.12](https://github.com/martinohmann/field_access/compare/field_access-v0.1.11...field_access-v0.1.12) - 2025-10-04
+
+### Fixed
+
+- *(docs)* prevent docs.rs build failures due to removed feature
+
 ## [0.1.11](https://github.com/martinohmann/field_access/compare/field_access-v0.1.10...field_access-v0.1.11) - 2024-11-04
 
 ### Other
