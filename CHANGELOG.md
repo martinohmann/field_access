@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.13](https://github.com/martinohmann/field_access/compare/field_access-v0.1.12...field_access-v0.1.13) - 2026-08-09
+
+### Other
+
+- updated the following local packages: field_access_derive
+
 ## [0.1.12](https://github.com/martinohmann/field_access/compare/field_access-v0.1.11...field_access-v0.1.12) - 2025-10-04
 
 ### Fixed
