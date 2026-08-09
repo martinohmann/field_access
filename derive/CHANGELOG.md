@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.12](https://github.com/martinohmann/field_access/compare/field_access_derive-v0.1.11...field_access_derive-v0.1.12) - 2026-08-09
+
+### Fixed
+
+- *(deps)* update rust crate syn to v3 ([#118](https://github.com/martinohmann/field_access/pull/118))
+
 ## [0.1.11](https://github.com/martinohmann/field_access/compare/field_access_derive-v0.1.10...field_access_derive-v0.1.11) - 2024-11-04
 
 ### Other
